@@ -1,10 +1,11 @@
 /**
  * QR Code Repository
+ * Enforces tenant filtering on all operations
  */
 
 import { prisma } from '@config/database';
 import { QRCode, Prisma } from '@prisma/client';
-import { NotFoundError } from '@utils/errors';
+import { NotFoundError, ForbiddenError } from '@utils/errors';
 import { logger } from '@utils/logger';
 import { CreateQRCodeInput, UpdateQRCodeInput } from './qr.types';
 
@@ -25,9 +26,17 @@ const qrSelect = {
   updatedAt: true,
 };
 
-export const findById = async (id: string): Promise<QRCode> => {
-  const qr = await prisma.qRCode.findUnique({
-    where: { id },
+export const findById = async (
+  id: string,
+  restaurantId?: string
+): Promise<QRCode> => {
+  const where: Prisma.QRCodeWhereInput = { id };
+  if (restaurantId) {
+    where.restaurantId = restaurantId;
+  }
+
+  const qr = await prisma.qRCode.findFirst({
+    where,
     select: qrSelect,
   });
 
@@ -38,14 +47,22 @@ export const findById = async (id: string): Promise<QRCode> => {
   return qr;
 };
 
-export const findByCode = async (code: string): Promise<(QRCode & { 
+export const findByCode = async (
+  code: string,
+  restaurantId?: string
+): Promise<(QRCode & { 
   isActive?: boolean; 
   isPublished?: boolean; 
   restaurantSlug?: string; 
   restaurantName?: string; 
 }) | null> => {
-  const result = await prisma.qRCode.findUnique({
-    where: { code },
+  const where: Prisma.QRCodeWhereInput = { code };
+  if (restaurantId) {
+    where.restaurantId = restaurantId;
+  }
+
+  const result = await prisma.qRCode.findFirst({
+    where,
     include: {
       restaurant: {
         select: {
@@ -85,6 +102,11 @@ export const create = async (
   restaurantId: string,
   code: string
 ): Promise<QRCode> => {
+  // Verify restaurantId in data matches if provided
+  if (data.restaurantId && data.restaurantId !== restaurantId) {
+    throw new ForbiddenError('Restaurant ID mismatch');
+  }
+
   const qr = await prisma.qRCode.create({
     data: {
       ...data,
@@ -100,8 +122,20 @@ export const create = async (
 
 export const update = async (
   id: string,
-  data: UpdateQRCodeInput
+  data: UpdateQRCodeInput,
+  restaurantId?: string
 ): Promise<QRCode> => {
+  // Verify ownership if restaurantId provided
+  if (restaurantId) {
+    const qr = await prisma.qRCode.findFirst({
+      where: { id, restaurantId },
+      select: { id: true },
+    });
+    if (!qr) {
+      throw new NotFoundError('QR Code', id);
+    }
+  }
+
   try {
     const qr = await prisma.qRCode.update({
       where: { id },
@@ -121,7 +155,21 @@ export const update = async (
   }
 };
 
-export const remove = async (id: string): Promise<void> => {
+export const remove = async (
+  id: string,
+  restaurantId?: string
+): Promise<void> => {
+  // Verify ownership if restaurantId provided
+  if (restaurantId) {
+    const qr = await prisma.qRCode.findFirst({
+      where: { id, restaurantId },
+      select: { id: true },
+    });
+    if (!qr) {
+      throw new NotFoundError('QR Code', id);
+    }
+  }
+
   try {
     await prisma.qRCode.delete({ where: { id } });
     logger.info('QR Code deleted', { qrId: id });
@@ -147,8 +195,20 @@ export const incrementScanCount = async (id: string): Promise<void> => {
 
 export const updateDownloadUrls = async (
   id: string,
-  urls: { pngUrl?: string; svgUrl?: string; pdfUrl?: string }
+  urls: { pngUrl?: string; svgUrl?: string; pdfUrl?: string },
+  restaurantId?: string
 ): Promise<void> => {
+  // Verify ownership if restaurantId provided
+  if (restaurantId) {
+    const qr = await prisma.qRCode.findFirst({
+      where: { id, restaurantId },
+      select: { id: true },
+    });
+    if (!qr) {
+      throw new NotFoundError('QR Code', id);
+    }
+  }
+
   await prisma.qRCode.update({
     where: { id },
     data: urls,

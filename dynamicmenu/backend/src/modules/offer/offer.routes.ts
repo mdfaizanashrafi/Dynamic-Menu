@@ -25,6 +25,8 @@
 import { Router } from 'express';
 import { authenticate, authorize } from '@middleware/auth';
 import { validateBody, validateParams, validateQuery, paginationSchema } from '@middleware/validate';
+import { resolveTenant } from '@middleware/tenantResolver';
+import { idempotencyMiddleware } from '@middleware/idempotencyMiddleware';
 import { z } from 'zod';
 import { UserRole } from '../../types/index';
 
@@ -83,6 +85,8 @@ router.post(
   '/',
   authenticate,
   authorize(UserRole.OWNER, UserRole.MANAGER),
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateBody(createOfferSchema),
   (_req, res) => {
     res.status(501).json({
@@ -124,6 +128,8 @@ router.put(
   '/:id',
   authenticate,
   authorize(UserRole.OWNER, UserRole.MANAGER),
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(offerIdSchema),
   validateBody(updateOfferSchema),
   (_req, res) => {
@@ -146,6 +152,7 @@ router.delete(
   '/:id',
   authenticate,
   authorize(UserRole.OWNER),
+  resolveTenant('owner'),
   validateParams(offerIdSchema),
   (_req, res) => {
     res.status(501).json({
@@ -167,6 +174,8 @@ router.post(
   '/:id/activate',
   authenticate,
   authorize(UserRole.OWNER, UserRole.MANAGER),
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(offerIdSchema),
   (_req, res) => {
     res.status(501).json({
@@ -188,6 +197,8 @@ router.post(
   '/:id/deactivate',
   authenticate,
   authorize(UserRole.OWNER, UserRole.MANAGER),
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(offerIdSchema),
   (_req, res) => {
     res.status(501).json({

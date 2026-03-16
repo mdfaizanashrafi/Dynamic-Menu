@@ -20,6 +20,7 @@ export const createMenuSchema = z.object({
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
   sortOrder: z.number().default(0),
+  restaurantId: z.string().uuid(),
 });
 
 export const updateMenuSchema = z.object({
@@ -45,6 +46,7 @@ export const createCategorySchema = z.object({
   image: z.string().url().optional(),
   menuId: z.string().uuid().optional(),
   sortOrder: z.number().default(0),
+  restaurantId: z.string().uuid(),
 });
 
 export const updateCategorySchema = z.object({
@@ -77,6 +79,7 @@ export const createMenuItemSchema = z.object({
   sortOrder: z.number().default(0),
   tagIds: z.array(z.string().uuid()).optional(),
   translations: z.record(z.any()).optional(),
+  restaurantId: z.string().uuid(),
 });
 
 export const updateMenuItemSchema = z.object({

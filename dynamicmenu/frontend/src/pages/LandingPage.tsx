@@ -7,44 +7,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { 
   Menu, X, ChevronRight, QrCode,
   Zap, TrendingUp, Clock, Globe, Shield, ArrowRight,
-  Star, CheckCircle2, Utensils, Play, MousePointer,
+  Star, CheckCircle2, Utensils, Play,
   Sparkles, Smartphone, Users, DollarSign
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  DemoModal, 
-  DemoSection, 
-  ExitIntentModal,
-  TourTrigger,
-  DemoPreviewCard 
-} from '@/components/demo';
+import { DemoModal } from '@/components/demo';
 
-// ============================================
-// Exit Intent Hook
-// ============================================
 
-const useExitIntent = (onExitIntent: () => void, enabled: boolean = true) => {
-  const [hasTriggered, setHasTriggered] = useState(false);
-
-  useEffect(() => {
-    if (!enabled || hasTriggered) return;
-
-    const handleMouseLeave = (e: MouseEvent) => {
-      // Only trigger when mouse leaves from the top of the page
-      if (e.clientY < 10 && e.relatedTarget === null) {
-        setHasTriggered(true);
-        onExitIntent();
-      }
-    };
-
-    document.addEventListener('mouseleave', handleMouseLeave);
-    return () => document.removeEventListener('mouseleave', handleMouseLeave);
-  }, [onExitIntent, enabled, hasTriggered]);
-
-  return { hasTriggered };
-};
 
 // ============================================
 // Navigation Component
@@ -64,7 +35,6 @@ const Navigation = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
     { label: 'Features', href: '#features' },
     { label: 'How it Works', href: '#how-it-works' },
     { label: 'Pricing', href: '#pricing' },
-    { label: 'Demo', href: '#demo' },
   ];
 
   return (
@@ -164,7 +134,7 @@ const Navigation = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
 // Hero Section
 // ============================================
 
-const HeroSection = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
+const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
       {/* Background */}
@@ -215,13 +185,6 @@ const HeroSection = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
                 <CheckCircle2 className="w-5 h-5 text-green-500" />
                 14-day free trial
               </div>
-              <Link 
-                to="/demo"
-                className="inline-flex items-center gap-1 text-orange-600 hover:text-orange-700 font-medium sm:ml-2"
-              >
-                <Play className="w-4 h-4" />
-                See it in action
-              </Link>
             </div>
 
             {/* Stats */}
@@ -314,14 +277,6 @@ const HeroSection = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
                 <p className="text-xs text-center mt-2 text-gray-500">Scan to view</p>
               </div>
 
-              {/* Demo Badge */}
-              <button
-                onClick={onOpenDemo}
-                className="absolute -top-4 -left-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-xl shadow-lg flex items-center gap-2 hover:shadow-xl hover:scale-105 transition-all"
-              >
-                <Play className="w-4 h-4" />
-                <span className="text-sm font-medium">Try the Demo</span>
-              </button>
             </div>
           </div>
         </div>
@@ -334,7 +289,7 @@ const HeroSection = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
 // Features Section
 // ============================================
 
-const FeaturesSection = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
+const FeaturesSection = () => {
   const features = [
     {
       icon: <Zap className="w-6 h-6" />,
@@ -403,17 +358,7 @@ const FeaturesSection = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
           ))}
         </div>
 
-        {/* See Features in Action CTA */}
-        <div className="mt-12 text-center">
-          <button
-            onClick={onOpenDemo}
-            className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium hover:underline"
-          >
-            <MousePointer className="w-4 h-4" />
-            See these features in action
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
+
       </div>
     </section>
   );
@@ -423,7 +368,7 @@ const FeaturesSection = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
 // How It Works Section
 // ============================================
 
-const HowItWorksSection = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
+const HowItWorksSection = () => {
   const steps = [
     {
       number: '01',
@@ -476,10 +421,7 @@ const HowItWorksSection = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
           ))}
         </div>
 
-        {/* Interactive Preview CTA */}
-        <div className="mt-16">
-          <DemoPreviewCard onClick={onOpenDemo} />
-        </div>
+
       </div>
     </section>
   );
@@ -489,7 +431,7 @@ const HowItWorksSection = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
 // Pricing Section
 // ============================================
 
-const PricingSection = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
+const PricingSection = () => {
   const plans = [
     {
       name: 'Starter',
@@ -603,16 +545,7 @@ const PricingSection = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
                 >
                   {plan.cta}
                 </Button>
-                <button
-                  onClick={onOpenDemo}
-                  className={`w-full text-sm font-medium py-2 rounded-lg transition-colors ${
-                    plan.popular 
-                      ? 'text-gray-400 hover:text-white' 
-                      : 'text-gray-500 hover:text-gray-900'
-                  }`}
-                >
-                  Try demo first
-                </button>
+
               </div>
             </div>
           ))}
@@ -699,12 +632,7 @@ const CTASection = () => {
             Start Free Trial
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
-          <Link to="/demo">
-            <Button variant="outline" size="lg" className="border-gray-600 text-white hover:bg-gray-800">
-              <Smartphone className="w-5 h-5 mr-2" />
-              Try Demo Menu
-            </Button>
-          </Link>
+
         </div>
         <p className="text-sm text-gray-500 mt-6">
           14-day free trial • No credit card required • Cancel anytime
@@ -788,8 +716,7 @@ const Footer = ({ onOpenDemo }: { onOpenDemo: () => void }) => {
 
 const LandingPage = () => {
   const [isDemoOpen, setIsDemoOpen] = useState(false);
-  const [showExitIntent, setShowExitIntent] = useState(false);
-  const [hasCompletedDemo, setHasCompletedDemo] = useState(false);
+
 
   // Track tour completion
   const handleDemoComplete = useCallback(() => {
@@ -813,14 +740,6 @@ const LandingPage = () => {
     }
   }, []);
 
-  // Exit intent detection
-  useExitIntent(() => {
-    // Only show exit intent if demo hasn't been completed and user has been on page > 5s
-    if (!hasCompletedDemo && !isDemoOpen) {
-      setTimeout(() => setShowExitIntent(true), 5000);
-    }
-  }, !hasCompletedDemo);
-
   const openDemo = useCallback(() => {
     setIsDemoOpen(true);
     console.log('[Analytics] Demo opened');
@@ -834,34 +753,13 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-white">
       <Navigation onOpenDemo={openDemo} />
-      <HeroSection onOpenDemo={openDemo} />
-      <FeaturesSection onOpenDemo={openDemo} />
-      <HowItWorksSection onOpenDemo={openDemo} />
-      
-      {/* Interactive Demo Section */}
-      <DemoSection onOpenDemo={openDemo} />
-      
-      <PricingSection onOpenDemo={openDemo} />
+      <HeroSection />
+      <FeaturesSection />
+      <HowItWorksSection />
+      <PricingSection />
       <TestimonialsSection />
       <CTASection />
       <Footer onOpenDemo={openDemo} />
-
-      {/* Demo Modal */}
-      <DemoModal
-        isOpen={isDemoOpen}
-        onClose={closeDemo}
-        onComplete={handleDemoComplete}
-      />
-
-      {/* Exit Intent Modal */}
-      <ExitIntentModal
-        isOpen={showExitIntent}
-        onClose={() => setShowExitIntent(false)}
-        onStartDemo={() => {
-          setShowExitIntent(false);
-          setIsDemoOpen(true);
-        }}
-      />
     </div>
   );
 };

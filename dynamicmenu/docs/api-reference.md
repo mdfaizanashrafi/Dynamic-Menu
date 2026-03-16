@@ -2,6 +2,119 @@
 
 Complete reference for the DynamicMenu REST API. All endpoints are prefixed with `/api` unless otherwise specified.
 
+## Tenant Context Architecture
+
+DynamicMenu is a multi-tenant platform where each restaurant operates as an isolated tenant. All API requests automatically resolve a tenant context based on the request path and authentication.
+
+### How Tenant Resolution Works
+
+Every request is analyzed by the Tenant Resolver Middleware to determine the target restaurant:
+
+| Endpoint Pattern | Resolution Strategy | Example |
+|-----------------|---------------------|---------|
+| `/api/public/menu/:slug` | Slug-based | Extract restaurant from URL slug |
+| `/api/menu/restaurant/:restaurantId` | Owner-based | Verify user owns restaurantId |
+| `/api/public/qr/:code` | QR-based | Lookup restaurant from QR code |
+
+### Tenant Context in Requests
+
+Once resolved, the tenant context is available throughout the request lifecycle:
+
+```typescript
+req.tenant = {
+  restaurantId: "uuid",
+  slug?: "restaurant-slug",
+  tableNumber?: 5,
+  qrType?: "TABLE",
+  isPublic: true,
+  resolvedAt: Date
+}
+```
+
+### Tenant Isolation Guarantees
+
+All database queries automatically include tenant filtering:
+- Users can only access data belonging to their restaurant
+- Cross-tenant data access is prevented at the repository layer
+- Public endpoints only expose published restaurant data
+
+---
+
+## Idempotency Protection
+
+All write operations (POST, PUT, PATCH) support idempotency to prevent duplicate operations caused by network retries, timeouts, or double-clicks.
+
+### Using Idempotency Keys
+
+Include the `Idempotency-Key` header in write requests:
+
+```http
+POST /api/menu/restaurant/:restaurantId/items
+Idempotency-Key: 8d3f4e2a-9f4b-4c7e-a123-5c9d1b2e3f4a
+Content-Type: application/json
+
+{
+  "name": "Margherita Pizza",
+  "price": 14.99
+}
+```
+
+### Idempotency Behavior
+
+**First Request:**
+- Server processes the request normally
+- Response is stored associated with the idempotency key
+- Returns success response
+
+**Duplicate Request (same key, same body):**
+- Server detects duplicate
+- Returns stored response with replay indicator:
+
+```json
+{
+  "success": true,
+  "data": { "id": "item-123", "name": "Margherita Pizza" },
+  "meta": {
+    "idempotencyReplay": true,
+    "originalTimestamp": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+**Conflicting Request (same key, different body):**
+- Returns 409 CONFLICT error
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_REQUEST",
+    "message": "Idempotency key was used with a different request body"
+  }
+}
+```
+
+### Supported Endpoints
+
+Idempotency is supported on all POST, PUT, and PATCH endpoints:
+
+| Endpoint | Method | Supports Idempotency |
+|----------|--------|---------------------|
+| `/api/restaurants` | POST | ✅ |
+| `/api/menu/restaurant/:id/items` | POST | ✅ |
+| `/api/menu/restaurant/:id/categories` | POST | ✅ |
+| `/api/qr/restaurant/:id` | POST | ✅ |
+| `/api/offers` | POST | ✅ |
+| `/api/auth/register` | POST | ✅ |
+
+### Key Requirements
+- Key must be unique per request (UUID recommended)
+- Key is valid for 24 hours
+- Only successful responses (2xx) are stored
+- Failed requests can be retried with the same key
+
+---
+
 ## Base URL
 
 | Environment | URL |
@@ -54,6 +167,46 @@ Obtain a token through the `/auth/login` or `/auth/register` endpoints.
   }
 }
 ```
+
+### Idempotency Replay Indicator
+
+When a request is replayed using an idempotency key, the response includes metadata:
+
+```json
+{
+  "success": true,
+  "data": { ... },
+  "meta": {
+    "idempotencyReplay": true,
+    "originalTimestamp": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+## Standard Request Headers
+
+### Idempotency-Key
+Prevents duplicate write operations.
+
+```
+Idempotency-Key: <uuid>
+```
+
+### Authorization
+Bearer token for authenticated endpoints.
+
+```
+Authorization: Bearer <jwt-token>
+```
+
+### X-Restaurant-ID
+Optional header to specify target restaurant (alternative to path parameter).
+
+```
+X-Restaurant-ID: <restaurant-uuid>
+```
+
+---
 
 ## HTTP Status Codes
 
@@ -117,6 +270,20 @@ Obtain a token through the `/auth/login` or `/auth/register` endpoints.
 | `DATABASE_ERROR` | 503 | Database operation failed |
 | `SERVICE_UNAVAILABLE` | 503 | Service temporarily unavailable |
 | `INTERNAL_ERROR` | 500 | Unexpected server error |
+
+### Idempotency Errors
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_REQUEST` | 409 | Same key used with different request body |
+| `IDEMPOTENCY_KEY_INVALID` | 400 | Key format is invalid (max 64 chars) |
+
+### Tenant/Ownership Errors
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `FORBIDDEN` | 403 | User does not have access to this restaurant |
+| `RESTAURANT_NOT_FOUND` | 404 | Restaurant not found or doesn't exist |
 
 ---
 
@@ -1405,6 +1572,56 @@ ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
   // Handle real-time updates
 };
+```
+
+---
+
+## Request Lifecycle
+
+```
+Request
+  ↓
+Authentication Middleware (if required)
+  ↓
+Tenant Resolver Middleware
+  ↓
+Idempotency Middleware (write operations)
+  ↓
+Controller
+  ↓
+Service
+  ↓
+Repository (with tenant filtering)
+  ↓
+Database
+```
+
+### Tenant Resolution Flow
+
+```
+Public Menu Request (/api/public/menu/:slug)
+  ↓
+Extract slug from URL
+  ↓
+Lookup restaurantId by slug (cached)
+  ↓
+Attach req.tenant = { restaurantId, slug, isPublic: true }
+
+Authenticated Request (/api/menu/restaurant/:restaurantId)
+  ↓
+Extract restaurantId from URL
+  ↓
+Verify user owns restaurant
+  ↓
+Attach req.tenant = { restaurantId, isPublic: false }
+
+QR Scan Request (/api/public/qr/:code)
+  ↓
+Extract QR code from URL
+  ↓
+Lookup restaurantId by QR code (cached)
+  ↓
+Attach req.tenant = { restaurantId, tableNumber, qrType, isPublic: true }
 ```
 
 ---

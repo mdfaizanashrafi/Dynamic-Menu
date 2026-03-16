@@ -6,6 +6,8 @@
 import { Router } from 'express';
 import { authenticate } from '@middleware/auth';
 import { validateBody, validateParams } from '@middleware/validate';
+import { resolveTenant } from '@middleware/tenantResolver';
+import { idempotencyMiddleware } from '@middleware/idempotencyMiddleware';
 import * as controller from './menu.controller';
 import {
   createMenuSchema,
@@ -34,6 +36,7 @@ router.use(authenticate);
 // List menus for restaurant
 router.get(
   '/restaurant/:restaurantId/menus',
+  resolveTenant('owner'),
   validateParams(restaurantParamsSchema),
   controller.listMenus
 );
@@ -41,6 +44,8 @@ router.get(
 // Create menu
 router.post(
   '/restaurant/:restaurantId/menus',
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(restaurantParamsSchema),
   validateBody(createMenuSchema),
   controller.createMenu
@@ -49,12 +54,15 @@ router.post(
 // Get, update, delete menu
 router.get(
   '/menus/:id',
+  resolveTenant('owner'),
   validateParams(menuParamsSchema),
   controller.getMenu
 );
 
 router.patch(
   '/menus/:id',
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(menuParamsSchema),
   validateBody(updateMenuSchema),
   controller.updateMenu
@@ -62,6 +70,7 @@ router.patch(
 
 router.delete(
   '/menus/:id',
+  resolveTenant('owner'),
   validateParams(menuParamsSchema),
   controller.deleteMenu
 );
@@ -73,6 +82,7 @@ router.delete(
 // List categories for restaurant
 router.get(
   '/restaurant/:restaurantId/categories',
+  resolveTenant('owner'),
   validateParams(restaurantParamsSchema),
   controller.listCategories
 );
@@ -80,6 +90,8 @@ router.get(
 // Create category
 router.post(
   '/restaurant/:restaurantId/categories',
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(restaurantParamsSchema),
   validateBody(createCategorySchema),
   controller.createCategory
@@ -88,6 +100,8 @@ router.post(
 // Reorder categories
 router.post(
   '/restaurant/:restaurantId/categories/reorder',
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(restaurantParamsSchema),
   validateBody(reorderCategoriesSchema),
   controller.reorderCategories
@@ -96,12 +110,15 @@ router.post(
 // Get, update, delete category
 router.get(
   '/categories/:id',
+  resolveTenant('owner'),
   validateParams(categoryParamsSchema),
   controller.getCategory
 );
 
 router.patch(
   '/categories/:id',
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(categoryParamsSchema),
   validateBody(updateCategorySchema),
   controller.updateCategory
@@ -109,6 +126,7 @@ router.patch(
 
 router.delete(
   '/categories/:id',
+  resolveTenant('owner'),
   validateParams(categoryParamsSchema),
   controller.deleteCategory
 );
@@ -120,6 +138,7 @@ router.delete(
 // List items for restaurant
 router.get(
   '/restaurant/:restaurantId/items',
+  resolveTenant('owner'),
   validateParams(restaurantParamsSchema),
   controller.listMenuItems
 );
@@ -127,6 +146,8 @@ router.get(
 // Create item
 router.post(
   '/restaurant/:restaurantId/items',
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(restaurantParamsSchema),
   validateBody(createMenuItemSchema),
   controller.createMenuItem
@@ -135,6 +156,8 @@ router.post(
 // Reorder items
 router.post(
   '/categories/:categoryId/items/reorder',
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(categoryParamsSchema),
   validateBody(reorderMenuItemsSchema),
   controller.reorderMenuItems
@@ -143,12 +166,15 @@ router.post(
 // Get, update, delete item
 router.get(
   '/items/:id',
+  resolveTenant('owner'),
   validateParams(menuItemParamsSchema),
   controller.getMenuItem
 );
 
 router.patch(
   '/items/:id',
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(menuItemParamsSchema),
   validateBody(updateMenuItemSchema),
   controller.updateMenuItem
@@ -156,6 +182,7 @@ router.patch(
 
 router.delete(
   '/items/:id',
+  resolveTenant('owner'),
   validateParams(menuItemParamsSchema),
   controller.deleteMenuItem
 );
@@ -163,6 +190,8 @@ router.delete(
 // Toggle availability
 router.patch(
   '/items/:id/availability',
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(menuItemParamsSchema),
   controller.toggleAvailability
 );

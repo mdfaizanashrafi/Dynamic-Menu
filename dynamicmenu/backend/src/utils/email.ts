@@ -22,7 +22,7 @@ interface EmailConfig {
 const createTransporter = () => {
   const config: EmailConfig = {
     host: env.SMTP_HOST || '',
-    port: parseInt(env.SMTP_PORT || '587', 10),
+    port: parseInt(String(env.SMTP_PORT || '587'), 10),
     secure: false,
     auth: {
       user: env.SMTP_USER || '',
@@ -36,7 +36,7 @@ const createTransporter = () => {
     return null;
   }
 
-  return nodemailer.createTransporter(config);
+  return nodemailer.createTransport(config);
 };
 
 const transporter = createTransporter();

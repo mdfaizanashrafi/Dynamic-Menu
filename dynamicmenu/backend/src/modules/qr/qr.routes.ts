@@ -5,6 +5,8 @@
 import { Router } from 'express';
 import { authenticate } from '@middleware/auth';
 import { validateBody, validateParams } from '@middleware/validate';
+import { resolveTenant } from '@middleware/tenantResolver';
+import { idempotencyMiddleware } from '@middleware/idempotencyMiddleware';
 import * as controller from './qr.controller';
 import {
   createQRCodeSchema,
@@ -16,8 +18,8 @@ import {
 
 const router = Router();
 
-// Public scan route (no auth required)
-router.get('/scan/:code', controller.scan);
+// Public scan route (no auth required) with tenant resolution
+router.get('/scan/:code', resolveTenant('qr'), controller.scan);
 
 // Protected routes
 router.use(authenticate);
@@ -25,6 +27,7 @@ router.use(authenticate);
 // List QR codes for restaurant
 router.get(
   '/restaurant/:restaurantId',
+  resolveTenant('owner'),
   validateParams(restaurantParamsSchema),
   controller.list
 );
@@ -32,6 +35,8 @@ router.get(
 // Create QR code
 router.post(
   '/restaurant/:restaurantId',
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(restaurantParamsSchema),
   validateBody(createQRCodeSchema),
   controller.create
@@ -40,12 +45,15 @@ router.post(
 // Get, update, delete QR code
 router.get(
   '/:id',
+  resolveTenant('owner'),
   validateParams(qrCodeParamsSchema),
   controller.getById
 );
 
 router.patch(
   '/:id',
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(qrCodeParamsSchema),
   validateBody(updateQRCodeSchema),
   controller.update
@@ -53,6 +61,7 @@ router.patch(
 
 router.delete(
   '/:id',
+  resolveTenant('owner'),
   validateParams(qrCodeParamsSchema),
   controller.remove
 );
@@ -60,6 +69,8 @@ router.delete(
 // Regenerate QR code with new branding
 router.post(
   '/:id/regenerate',
+  resolveTenant('owner'),
+  idempotencyMiddleware,
   validateParams(qrCodeParamsSchema),
   validateBody(regenerateQRCodeSchema),
   controller.regenerate
@@ -68,6 +79,7 @@ router.post(
 // Get download URLs for a QR code
 router.get(
   '/:id/downloads',
+  resolveTenant('owner'),
   validateParams(qrCodeParamsSchema),
   controller.getDownloads
 );
@@ -75,6 +87,7 @@ router.get(
 // Download all sizes as ZIP
 router.get(
   '/:id/download-zip',
+  resolveTenant('owner'),
   validateParams(qrCodeParamsSchema),
   controller.downloadZip
 );

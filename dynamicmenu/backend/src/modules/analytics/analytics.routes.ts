@@ -5,6 +5,7 @@
 import { Router } from 'express';
 import { authenticate } from '@middleware/auth';
 import { validateBody, validateQuery } from '@middleware/validate';
+import { resolveTenant } from '@middleware/tenantResolver';
 import { z } from 'zod';
 import * as service from './analytics.service';
 import { recordViewSchema, analyticsQuerySchema } from './analytics.types';
@@ -26,8 +27,8 @@ router.post('/view', validateBody(recordViewSchema), async (req, res, next) => {
 // Protected routes
 router.use(authenticate);
 
-// Get restaurant analytics
-router.get('/restaurant/:restaurantId', async (req, res, next) => {
+// Get restaurant analytics with tenant resolution
+router.get('/restaurant/:restaurantId', resolveTenant('owner'), async (req, res, next) => {
   try {
     const { restaurantId } = req.params;
     const query = req.query;
@@ -45,8 +46,8 @@ router.get('/restaurant/:restaurantId', async (req, res, next) => {
   }
 });
 
-// Get dashboard summary
-router.get('/restaurant/:restaurantId/summary', async (req, res, next) => {
+// Get dashboard summary with tenant resolution
+router.get('/restaurant/:restaurantId/summary', resolveTenant('owner'), async (req, res, next) => {
   try {
     const { restaurantId } = req.params;
     const summary = await service.getDashboardSummary(restaurantId);

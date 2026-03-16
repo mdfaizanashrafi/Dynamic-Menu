@@ -2,11 +2,12 @@
  * Restaurant Repository
  * Data access layer for restaurant operations
  * Follows Single Responsibility Principle
+ * Enforces tenant filtering on all operations
  */
 
 import { prisma } from '@config/database';
 import { Restaurant, Prisma } from '@prisma/client';
-import { NotFoundError } from '@utils/errors';
+import { NotFoundError, ForbiddenError } from '@utils/errors';
 import { logger } from '@utils/logger';
 import { CreateRestaurantInput, UpdateRestaurantInput } from './restaurant.types';
 
@@ -33,10 +34,43 @@ const defaultSelect = {
   updatedAt: true,
 };
 
+// ============================================
+// ACCESS VERIFICATION
+// ============================================
+
+export const verifyRestaurantAccess = async (
+  restaurantId: string,
+  userId: string
+): Promise<void> => {
+  const restaurant = await prisma.restaurant.findFirst({
+    where: {
+      id: restaurantId,
+      ownerId: userId,
+    },
+    select: { id: true },
+  });
+
+  if (!restaurant) {
+    throw new ForbiddenError('Access denied to this restaurant');
+  }
+};
+
+// ============================================
+// CRUD OPERATIONS
+// ============================================
+
 // Find restaurant by ID
-export const findById = async (id: string): Promise<Restaurant> => {
-  const restaurant = await prisma.restaurant.findUnique({
-    where: { id },
+export const findById = async (
+  id: string,
+  userId?: string
+): Promise<Restaurant> => {
+  const where: Prisma.RestaurantWhereInput = { id };
+  if (userId) {
+    where.ownerId = userId;
+  }
+
+  const restaurant = await prisma.restaurant.findFirst({
+    where,
     select: defaultSelect,
   });
 
@@ -48,9 +82,17 @@ export const findById = async (id: string): Promise<Restaurant> => {
 };
 
 // Find restaurant by slug
-export const findBySlug = async (slug: string): Promise<Restaurant> => {
-  const restaurant = await prisma.restaurant.findUnique({
-    where: { slug },
+export const findBySlug = async (
+  slug: string,
+  userId?: string
+): Promise<Restaurant> => {
+  const where: Prisma.RestaurantWhereInput = { slug };
+  if (userId) {
+    where.ownerId = userId;
+  }
+
+  const restaurant = await prisma.restaurant.findFirst({
+    where,
     select: defaultSelect,
   });
 
@@ -142,8 +184,14 @@ export const create = async (
 // Update restaurant
 export const update = async (
   id: string,
-  data: UpdateRestaurantInput
+  data: UpdateRestaurantInput,
+  userId?: string
 ): Promise<Restaurant> => {
+  // Verify ownership if userId provided
+  if (userId) {
+    await verifyRestaurantAccess(id, userId);
+  }
+
   try {
     const restaurant = await prisma.restaurant.update({
       where: { id },
@@ -168,7 +216,15 @@ export const update = async (
 };
 
 // Delete restaurant
-export const remove = async (id: string): Promise<void> => {
+export const remove = async (
+  id: string,
+  userId?: string
+): Promise<void> => {
+  // Verify ownership if userId provided
+  if (userId) {
+    await verifyRestaurantAccess(id, userId);
+  }
+
   try {
     await prisma.restaurant.delete({
       where: { id },
@@ -186,7 +242,15 @@ export const remove = async (id: string): Promise<void> => {
 };
 
 // Get restaurant statistics
-export const getStatistics = async (id: string) => {
+export const getStatistics = async (
+  id: string,
+  userId?: string
+) => {
+  // Verify ownership if userId provided
+  if (userId) {
+    await verifyRestaurantAccess(id, userId);
+  }
+
   const stats = await prisma.restaurant.findUnique({
     where: { id },
     select: {

@@ -1,11 +1,12 @@
 /**
  * Menu Repository
  * Data access layer for menu, categories, and items
+ * Enforces tenant filtering on all operations
  */
 
 import { prisma } from '@config/database';
 import { Menu, Category, MenuItem, Prisma } from '@prisma/client';
-import { NotFoundError } from '@utils/errors';
+import { NotFoundError, ForbiddenError } from '@utils/errors';
 import { logger } from '@utils/logger';
 import {
   CreateMenuInput,
@@ -15,6 +16,43 @@ import {
   CreateMenuItemInput,
   UpdateMenuItemInput,
 } from './menu.types';
+
+// ============================================
+// OWNERSHIP VERIFICATION HELPERS
+// ============================================
+
+async function verifyMenuOwnership(menuId: string, restaurantId: string): Promise<void> {
+  const menu = await prisma.menu.findFirst({
+    where: { id: menuId, restaurantId },
+    select: { id: true },
+  });
+  
+  if (!menu) {
+    throw new NotFoundError('Menu', menuId);
+  }
+}
+
+async function verifyCategoryOwnership(categoryId: string, restaurantId: string): Promise<void> {
+  const category = await prisma.category.findFirst({
+    where: { id: categoryId, restaurantId },
+    select: { id: true },
+  });
+  
+  if (!category) {
+    throw new NotFoundError('Category', categoryId);
+  }
+}
+
+async function verifyItemOwnership(itemId: string, restaurantId: string): Promise<void> {
+  const item = await prisma.menuItem.findFirst({
+    where: { id: itemId, restaurantId },
+    select: { id: true },
+  });
+  
+  if (!item) {
+    throw new NotFoundError('Menu item', itemId);
+  }
+}
 
 // ============================================
 // MENU OPERATIONS
@@ -38,9 +76,17 @@ const menuSelect = {
   updatedAt: true,
 };
 
-export const findMenuById = async (id: string): Promise<Menu> => {
-  const menu = await prisma.menu.findUnique({
-    where: { id },
+export const findMenuById = async (
+  id: string,
+  restaurantId?: string
+): Promise<Menu> => {
+  const where: Prisma.MenuWhereInput = { id };
+  if (restaurantId) {
+    where.restaurantId = restaurantId;
+  }
+
+  const menu = await prisma.menu.findFirst({
+    where,
     select: menuSelect,
   });
 
@@ -81,7 +127,9 @@ export const findMenusByRestaurant = async (
  * Find all active menus for a restaurant (without pagination)
  * Used for time-based filtering
  */
-export const findActiveMenus = async (restaurantId: string): Promise<Menu[]> => {
+export const findActiveMenus = async (
+  restaurantId: string
+): Promise<Menu[]> => {
   return prisma.menu.findMany({
     where: {
       restaurantId,
@@ -96,6 +144,11 @@ export const createMenu = async (
   data: CreateMenuInput,
   restaurantId: string
 ): Promise<Menu> => {
+  // Verify restaurantId in data matches if provided
+  if (data.restaurantId && data.restaurantId !== restaurantId) {
+    throw new ForbiddenError('Restaurant ID mismatch');
+  }
+
   const menu = await prisma.menu.create({
     data: {
       ...data,
@@ -110,11 +163,18 @@ export const createMenu = async (
 
 export const updateMenu = async (
   id: string,
-  data: UpdateMenuInput
+  data: UpdateMenuInput,
+  restaurantId?: string
 ): Promise<Menu> => {
+  // Verify ownership if restaurantId provided
+  if (restaurantId) {
+    await verifyMenuOwnership(id, restaurantId);
+  }
+
   try {
+    const where: Prisma.MenuWhereUniqueInput = { id };
     const menu = await prisma.menu.update({
-      where: { id },
+      where,
       data: data as Prisma.MenuUpdateInput,
       select: menuSelect,
     });
@@ -131,7 +191,15 @@ export const updateMenu = async (
   }
 };
 
-export const deleteMenu = async (id: string): Promise<void> => {
+export const deleteMenu = async (
+  id: string,
+  restaurantId?: string
+): Promise<void> => {
+  // Verify ownership if restaurantId provided
+  if (restaurantId) {
+    await verifyMenuOwnership(id, restaurantId);
+  }
+
   try {
     await prisma.menu.delete({ where: { id } });
     logger.info('Menu deleted', { menuId: id });
@@ -161,9 +229,17 @@ const categorySelect = {
   updatedAt: true,
 };
 
-export const findCategoryById = async (id: string): Promise<Category> => {
-  const category = await prisma.category.findUnique({
-    where: { id },
+export const findCategoryById = async (
+  id: string,
+  restaurantId?: string
+): Promise<Category> => {
+  const where: Prisma.CategoryWhereInput = { id };
+  if (restaurantId) {
+    where.restaurantId = restaurantId;
+  }
+
+  const category = await prisma.category.findFirst({
+    where,
     select: categorySelect,
   });
 
@@ -194,6 +270,11 @@ export const createCategory = async (
   data: CreateCategoryInput,
   restaurantId: string
 ): Promise<Category> => {
+  // Verify restaurantId in data matches if provided
+  if (data.restaurantId && data.restaurantId !== restaurantId) {
+    throw new ForbiddenError('Restaurant ID mismatch');
+  }
+
   const category = await prisma.category.create({
     data: {
       ...data,
@@ -208,8 +289,14 @@ export const createCategory = async (
 
 export const updateCategory = async (
   id: string,
-  data: UpdateCategoryInput
+  data: UpdateCategoryInput,
+  restaurantId?: string
 ): Promise<Category> => {
+  // Verify ownership if restaurantId provided
+  if (restaurantId) {
+    await verifyCategoryOwnership(id, restaurantId);
+  }
+
   try {
     const category = await prisma.category.update({
       where: { id },
@@ -229,7 +316,15 @@ export const updateCategory = async (
   }
 };
 
-export const deleteCategory = async (id: string): Promise<void> => {
+export const deleteCategory = async (
+  id: string,
+  restaurantId?: string
+): Promise<void> => {
+  // Verify ownership if restaurantId provided
+  if (restaurantId) {
+    await verifyCategoryOwnership(id, restaurantId);
+  }
+
   try {
     await prisma.category.delete({ where: { id } });
     logger.info('Category deleted', { categoryId: id });
@@ -283,10 +378,16 @@ const menuItemSelect = {
 };
 
 export const findMenuItemById = async (
-  id: string
+  id: string,
+  restaurantId?: string
 ): Promise<MenuItem & { tags?: { id: string; name: string; color: string; textColor: string; icon: string | null }[] }> => {
-  const item = await prisma.menuItem.findUnique({
-    where: { id },
+  const where: Prisma.MenuItemWhereInput = { id };
+  if (restaurantId) {
+    where.restaurantId = restaurantId;
+  }
+
+  const item = await prisma.menuItem.findFirst({
+    where,
     select: {
       ...menuItemSelect,
       tags: {
@@ -353,6 +454,11 @@ export const createMenuItem = async (
   data: CreateMenuItemInput,
   restaurantId: string
 ): Promise<MenuItem> => {
+  // Verify restaurantId in data matches if provided
+  if (data.restaurantId && data.restaurantId !== restaurantId) {
+    throw new ForbiddenError('Restaurant ID mismatch');
+  }
+
   const { tagIds, ...itemData } = data;
 
   const item = await prisma.menuItem.create({
@@ -374,8 +480,14 @@ export const createMenuItem = async (
 
 export const updateMenuItem = async (
   id: string,
-  data: UpdateMenuItemInput
+  data: UpdateMenuItemInput,
+  restaurantId?: string
 ): Promise<MenuItem> => {
+  // Verify ownership if restaurantId provided
+  if (restaurantId) {
+    await verifyItemOwnership(id, restaurantId);
+  }
+
   try {
     const { tagIds, ...itemData } = data;
 
@@ -404,7 +516,15 @@ export const updateMenuItem = async (
   }
 };
 
-export const deleteMenuItem = async (id: string): Promise<void> => {
+export const deleteMenuItem = async (
+  id: string,
+  restaurantId?: string
+): Promise<void> => {
+  // Verify ownership if restaurantId provided
+  if (restaurantId) {
+    await verifyItemOwnership(id, restaurantId);
+  }
+
   try {
     await prisma.menuItem.delete({ where: { id } });
     logger.info('Menu item deleted', { itemId: id });
@@ -420,8 +540,14 @@ export const deleteMenuItem = async (id: string): Promise<void> => {
 
 export const reorderMenuItems = async (
   categoryId: string,
-  itemIds: string[]
+  itemIds: string[],
+  restaurantId?: string
 ): Promise<void> => {
+  // Verify category belongs to restaurant if provided
+  if (restaurantId) {
+    await verifyCategoryOwnership(categoryId, restaurantId);
+  }
+
   await prisma.$transaction(
     itemIds.map((id, index) =>
       prisma.menuItem.update({
@@ -437,8 +563,14 @@ export const reorderMenuItems = async (
 // Toggle item availability
 export const toggleItemAvailability = async (
   id: string,
-  isAvailable: boolean
+  isAvailable: boolean,
+  restaurantId?: string
 ): Promise<MenuItem> => {
+  // Verify ownership if restaurantId provided
+  if (restaurantId) {
+    await verifyItemOwnership(id, restaurantId);
+  }
+
   try {
     const item = await prisma.menuItem.update({
       where: { id },

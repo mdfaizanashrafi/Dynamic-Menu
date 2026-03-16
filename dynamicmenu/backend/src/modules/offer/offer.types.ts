@@ -18,6 +18,7 @@ export const createOfferSchema = z.object({
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
   isActive: z.boolean().default(true),
+  restaurantId: z.string().uuid(),
 }).refine((data) => data.endDate > data.startDate, {
   message: 'End date must be after start date',
   path: ['endDate'],

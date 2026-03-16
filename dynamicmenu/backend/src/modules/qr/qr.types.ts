@@ -28,12 +28,15 @@ export const createQRCodeSchema = z.object({
   size: z.enum(['SMALL', 'MEDIUM', 'LARGE', 'XL']).optional(),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
   frameStyle: z.enum(['NONE', 'ROUNDED', 'FANCY']).optional(),
+  restaurantId: z.string().uuid(),
 });
 
 export const updateQRCodeSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   type: z.nativeEnum(QRCodeType).optional(),
   tableNumber: z.number().int().positive().optional(),
+  redirectUrl: z.string().url().optional(),
+  code: z.string().optional(),
 });
 
 export const regenerateQRCodeSchema = z.object({

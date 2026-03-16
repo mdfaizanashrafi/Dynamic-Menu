@@ -17,6 +17,9 @@ import { UserRole, MenuType, QRCodeType, DiscountType } from '@prisma/client';
 // Re-export Prisma enums for convenience
 export { UserRole, MenuType, QRCodeType, DiscountType };
 
+// Export tenant types
+export * from './tenant';
+
 // ============================================
 // Express Type Extensions
 // ============================================
@@ -374,9 +377,11 @@ export interface AuthResponse {
   user: {
     id: string;
     email: string;
-    firstName: string;
-    lastName: string;
+    firstName: string | null;
+    lastName: string | null;
     role: UserRole;
+    subscriptionTier: string;
+    trialEndsAt: Date | null;
   };
   token: string;
 }

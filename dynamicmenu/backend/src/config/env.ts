@@ -43,6 +43,11 @@ const envSchema = z.object({
   
   // Logging
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
+  
+  // Idempotency
+  IDEMPOTENCY_TTL_MS: z.string().optional().transform((val) => 
+    val ? parseInt(val, 10) : undefined
+  ),
 });
 
 // Parse and validate environment

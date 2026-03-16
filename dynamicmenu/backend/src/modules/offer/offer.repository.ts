@@ -1,11 +1,12 @@
 /**
  * Offer Repository
  * Data access layer for offers and promotions
+ * Enforces tenant filtering on all operations
  */
 
 import { prisma } from '@config/database';
 import { Offer, Prisma } from '@prisma/client';
-import { NotFoundError } from '@utils/errors';
+import { NotFoundError, ForbiddenError } from '@utils/errors';
 import { logger } from '@utils/logger';
 import { CreateOfferInput, UpdateOfferInput } from './offer.types';
 
@@ -35,6 +36,11 @@ export const create = async (
   data: CreateOfferInput,
   restaurantId: string
 ): Promise<Offer> => {
+  // Verify restaurantId in data matches if provided
+  if (data.restaurantId && data.restaurantId !== restaurantId) {
+    throw new ForbiddenError('Restaurant ID mismatch');
+  }
+
   const offer = await prisma.offer.create({
     data: {
       ...data,
@@ -47,9 +53,17 @@ export const create = async (
   return offer;
 };
 
-export const findById = async (id: string): Promise<Offer> => {
-  const offer = await prisma.offer.findUnique({
-    where: { id },
+export const findById = async (
+  id: string,
+  restaurantId?: string
+): Promise<Offer> => {
+  const where: Prisma.OfferWhereInput = { id };
+  if (restaurantId) {
+    where.restaurantId = restaurantId;
+  }
+
+  const offer = await prisma.offer.findFirst({
+    where,
     select: offerSelect,
   });
 
@@ -105,8 +119,20 @@ export const findActiveOffers = async (
 
 export const update = async (
   id: string,
-  data: UpdateOfferInput
+  data: UpdateOfferInput,
+  restaurantId?: string
 ): Promise<Offer> => {
+  // Verify ownership if restaurantId provided
+  if (restaurantId) {
+    const offer = await prisma.offer.findFirst({
+      where: { id, restaurantId },
+      select: { id: true },
+    });
+    if (!offer) {
+      throw new NotFoundError('Offer', id);
+    }
+  }
+
   try {
     const offer = await prisma.offer.update({
       where: { id },
@@ -126,7 +152,21 @@ export const update = async (
   }
 };
 
-export const remove = async (id: string): Promise<void> => {
+export const remove = async (
+  id: string,
+  restaurantId?: string
+): Promise<void> => {
+  // Verify ownership if restaurantId provided
+  if (restaurantId) {
+    const offer = await prisma.offer.findFirst({
+      where: { id, restaurantId },
+      select: { id: true },
+    });
+    if (!offer) {
+      throw new NotFoundError('Offer', id);
+    }
+  }
+
   try {
     await prisma.offer.delete({ where: { id } });
     logger.info('Offer deleted', { offerId: id });

@@ -5,6 +5,7 @@
 
 import { Router } from 'express';
 import { validateParams } from '@middleware/validate';
+import { resolveTenant } from '@middleware/tenantResolver';
 import { z } from 'zod';
 import { prisma } from '@config/database';
 import * as restaurantService from '@modules/restaurant/restaurant.service';
@@ -328,6 +329,7 @@ function getMockDemoData() {
 router.get(
   '/restaurant/:slug',
   validateParams(slugSchema),
+  resolveTenant('slug'),
   async (req, res, next) => {
     try {
       const { slug } = req.params;
@@ -361,6 +363,7 @@ router.get(
 router.get(
   '/menu/:slug',
   validateParams(slugSchema),
+  resolveTenant('slug'),
   async (req, res, next) => {
     try {
       const { slug } = req.params;
@@ -394,6 +397,7 @@ router.get(
 router.get(
   '/menu/:slug/current',
   validateParams(slugSchema),
+  resolveTenant('slug'),
   async (req, res, next) => {
     try {
       const { slug } = req.params;
@@ -442,6 +446,7 @@ router.get(
 router.get(
   '/menu/:slug/featured',
   validateParams(slugSchema),
+  resolveTenant('slug'),
   async (req, res, next) => {
     try {
       const { slug } = req.params;
@@ -462,6 +467,7 @@ router.get(
 router.get(
   '/menu/:slug/popular',
   validateParams(slugSchema),
+  resolveTenant('slug'),
   async (req, res, next) => {
     try {
       const { slug } = req.params;
@@ -482,6 +488,7 @@ router.get(
 router.get(
   '/qr/:code',
   validateParams(qrCodeSchema),
+  resolveTenant('qr'),
   async (req, res, next) => {
     try {
       const { code } = req.params;

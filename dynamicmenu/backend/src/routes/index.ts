@@ -18,6 +18,7 @@
  */
 
 import { Router } from 'express';
+import { requestLoggingMiddleware } from '@utils/tenantLogger';
 import authRoutes from '@modules/auth/auth.routes';
 import restaurantRoutes from '@modules/restaurant/restaurant.routes';
 import menuRoutes from '@modules/menu/menu.routes';
@@ -27,6 +28,9 @@ import offerRoutes from '@modules/offer/offer.routes';
 import publicRoutes from '@modules/public/public.routes';
 
 const router = Router();
+
+// Global middleware registration
+router.use(requestLoggingMiddleware);
 
 /**
  * Health Check Endpoint
