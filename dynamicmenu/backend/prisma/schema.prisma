@@ -1,0 +1,367 @@
+// DynamicMenu Database Schema
+// Production-grade Prisma schema for QR-based digital menu platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      UserRole @default(OWNER)
+  isActive  Boolean  @default(true)
+  
+  // Subscription & Freemium
+  subscriptionTier SubscriptionTier @default(FREE)
+  trialEndsAt      DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  restaurants Restaurant[]
+  sessions    Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+enum UserRole {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+enum SubscriptionTier {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+// ============================================
+// RESTAURANT
+// ============================================
+
+model Restaurant {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  description String?
+  logo        String?
+  address     String?
+  phone       String?
+  email       String?
+  website     String?
+  
+  // Branding
+  primaryColor   String   @default("#FF6B35")
+  secondaryColor String   @default("#16A34A")
+  fontFamily     String   @default("Inter")
+  
+  // Settings
+  isActive      Boolean @default(true)
+  isPublished   Boolean @default(false)
+  defaultLanguage String @default("en")
+  supportedLanguages String[] @default(["en"])
+  
+  // Relations
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  menus       Menu[]
+  categories  Category[]
+  menuItems   MenuItem[]
+  qrCodes     QRCode[]
+  offers      Offer[]
+  analytics   MenuAnalytics[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("restaurants")
+}
+
+// ============================================
+// MENU
+// ============================================
+
+model Menu {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  type        MenuType   @default(MAIN)
+  isActive    Boolean    @default(true)
+  isSeasonal  Boolean    @default(false)
+  
+  // Time-based visibility
+  startTime   String?    // "07:00" format
+  endTime     String?    // "23:00" format
+  daysOfWeek  Int[]      // [1,2,3,4,5,6,7] for Mon-Sun
+  
+  // Seasonal settings
+  startDate   DateTime?
+  endDate     DateTime?
+  
+  // Ordering
+  sortOrder   Int        @default(0)
+  
+  // Relations
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  categories Category[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("menus")
+}
+
+enum MenuType {
+  MAIN
+  BREAKFAST
+  LUNCH
+  DINNER
+  BRUNCH
+  SEASONAL
+  SPECIAL
+}
+
+// ============================================
+// CATEGORY
+// ============================================
+
+model Category {
+  id          String @id @default(uuid())
+  name        String
+  description String?
+  image       String?
+  
+  // Ordering
+  sortOrder Int @default(0)
+  
+  // Relations
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  menuId String?
+  menu   Menu?   @relation(fields: [menuId], references: [id], onDelete: SetNull)
+  
+  items MenuItem[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+// ============================================
+// MENU ITEM
+// ============================================
+
+model MenuItem {
+  id          String @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal @db.Decimal(10, 2)
+  comparePrice Decimal? @db.Decimal(10, 2)
+  
+  // Media
+  image       String?
+  images      String[]
+  
+  // Availability
+  isAvailable Boolean @default(true)
+  isFeatured  Boolean @default(false)
+  isPopular   Boolean @default(false)
+  
+  // Ordering
+  sortOrder Int @default(0)
+  
+  // Translations (JSON for flexibility)
+  translations Json?
+  
+  // Relations
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  categoryId String
+  category   Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  tags MenuItemTag[]
+  
+  analytics MenuItemAnalytics[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("menu_items")
+}
+
+// ============================================
+// TAGS
+// ============================================
+
+model MenuItemTag {
+  id   String @id @default(uuid())
+  name String // VEGAN, SPICY, GLUTEN_FREE, HALAL, etc.
+  
+  // Styling
+  color       String @default("#16A34A")
+  textColor   String @default("#FFFFFF")
+  icon        String?
+  
+  // Relations
+  menuItems MenuItem[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("menu_item_tags")
+}
+
+// ============================================
+// QR CODE
+// ============================================
+
+model QRCode {
+  id          String @id @default(uuid())
+  name        String // "Table 1", "Bar Counter", etc.
+  type        QRCodeType @default(TABLE)
+  code        String @unique
+  
+  // Settings
+  tableNumber Int?
+  redirectUrl String?
+  
+  // Download options
+  pngUrl      String?
+  svgUrl      String?
+  pdfUrl      String?
+  
+  // Relations
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  // Analytics
+  scanCount Int @default(0)
+  lastScanAt DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("qr_codes")
+}
+
+enum QRCodeType {
+  RESTAURANT
+  TABLE
+  ROOM
+  BAR
+  TAKEAWAY
+  DELIVERY
+}
+
+// ============================================
+// OFFERS & PROMOTIONS
+// ============================================
+
+model Offer {
+  id          String @id @default(uuid())
+  name        String
+  description String?
+  
+  // Offer details
+  discountType  DiscountType @default(PERCENTAGE)
+  discountValue Decimal      @db.Decimal(10, 2)
+  
+  // Validity
+  startDate DateTime
+  endDate   DateTime
+  
+  // Usage
+  isActive Boolean @default(true)
+  
+  // Relations
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("offers")
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_ITEM
+}
+
+// ============================================
+// ANALYTICS
+// ============================================
+
+model MenuAnalytics {
+  id    String   @id @default(uuid())
+  date  DateTime
+  
+  // Metrics
+  totalViews      Int @default(0)
+  uniqueVisitors  Int @default(0)
+  avgSessionTime  Int @default(0) // in seconds
+  
+  // Device breakdown
+  deviceTypes Json?
+  
+  // Relations
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+
+  @@unique([restaurantId, date])
+  @@map("menu_analytics")
+}
+
+model MenuItemAnalytics {
+  id String @id @default(uuid())
+  
+  // Metrics
+  views    Int @default(0)
+  clicks   Int @default(0)
+  orders   Int @default(0) // For future ordering feature
+  
+  // Relations
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  
+  date DateTime
+
+  @@unique([menuItemId, date])
+  @@map("menu_item_analytics")
+}

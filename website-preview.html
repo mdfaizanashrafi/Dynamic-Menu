@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicMenu - Digital Menu Management Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF6B35',
+                        'primary-dark': '#E55A2B',
+                        accent: '#16A34A',
+                        'accent-dark': '#15803D',
+                        dark: '#0F172A',
+                        'gray-850': '#1E293B',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(30px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        * {
+            scroll-behavior: smooth;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8F6B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%);
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(255, 107, 53, 0.15);
+        }
+        .pricing-card {
+            transition: all 0.3s ease;
+        }
+        .pricing-card:hover {
+            transform: scale(1.02);
+        }
+        .pricing-card.featured {
+            border: 2px solid #FF6B35;
+        }
+        .phone-mockup {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .chart-bar {
+            transition: height 1s ease-out;
+        }
+        .category-pill {
+            transition: all 0.2s ease;
+        }
+        .category-pill:hover {
+            background-color: #FF6B35;
+            color: white;
+        }
+        .menu-item-card {
+            transition: all 0.3s ease;
+        }
+        .menu-item-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50 text-gray-900">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <i data-lucide="utensils" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="font-bold text-xl">DynamicMenu</span>
+                </div>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#features" class="text-gray-600 hover:text-primary transition-colors">Features</a>
+                    <a href="#how-it-works" class="text-gray-600 hover:text-primary transition-colors">How It Works</a>
+                    <a href="#menu-preview" class="text-gray-600 hover:text-primary transition-colors">Menu Preview</a>
+                    <a href="#dashboard" class="text-gray-600 hover:text-primary transition-colors">Dashboard</a>
+                    <a href="#pricing" class="text-gray-600 hover:text-primary transition-colors">Pricing</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="hidden sm:block text-gray-600 hover:text-gray-900 font-medium">Sign In</button>
+                    <button class="bg-primary hover:bg-primary-dark text-white px-5 py-2 rounded-lg font-medium transition-all hover:shadow-lg hover:shadow-primary/30">
+                        Get Started
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient min-h-screen flex items-center pt-16 relative overflow-hidden">
+        <!-- Background Elements -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute -top-40 -right-40 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-accent/20 rounded-full blur-3xl"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/5 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-left animate-slide-up">
+                    <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6">
+                        <span class="w-2 h-2 bg-accent rounded-full animate-pulse"></span>
+                        <span class="text-sm text-gray-300">Now with AI-powered analytics</span>
+                    </div>
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
+                        Modern Menus for<br>
+                        <span class="gradient-text">Modern Restaurants</span>
+                    </h1>
+                    <p class="text-lg text-gray-400 mb-8 max-w-xl mx-auto lg:mx-0">
+                        Create beautiful digital menus, generate QR codes instantly, and manage everything in real-time. 
+                        No app downloads required.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <button class="bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:shadow-xl hover:shadow-primary/30 flex items-center justify-center gap-2">
+                            Start Free Trial
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </button>
+                        <button class="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/20 px-8 py-4 rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="play-circle" class="w-5 h-5"></i>
+                            Watch Demo
+                        </button>
+                    </div>
+                    <div class="mt-10 flex items-center gap-6 justify-center lg:justify-start">
+                        <div class="flex -space-x-3">
+                            <img src="https://i.pravatar.cc/100?img=1" alt="User" class="w-10 h-10 rounded-full border-2 border-gray-800">
+                            <img src="https://i.pravatar.cc/100?img=2" alt="User" class="w-10 h-10 rounded-full border-2 border-gray-800">
+                            <img src="https://i.pravatar.cc/100?img=3" alt="User" class="w-10 h-10 rounded-full border-2 border-gray-800">
+                            <img src="https://i.pravatar.cc/100?img=4" alt="User" class="w-10 h-10 rounded-full border-2 border-gray-800">
+                        </div>
+                        <div class="text-left">
+                            <div class="flex items-center gap-1 text-yellow-400">
+                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            </div>
+                            <p class="text-sm text-gray-400">Trusted by 2,000+ restaurants</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative animate-float hidden lg:block">
+                    <!-- Phone Mockup -->
+                    <div class="phone-mockup bg-gray-900 rounded-[3rem] p-3 w-80 mx-auto relative z-20">
+                        <div class="bg-white rounded-[2.5rem] overflow-hidden">
+                            <!-- Status Bar -->
+                            <div class="bg-gray-900 text-white px-6 py-2 flex justify-between items-center text-xs">
+                                <span>9:41</span>
+                                <div class="flex items-center gap-1">
+                                    <i data-lucide="signal" class="w-3 h-3"></i>
+                                    <i data-lucide="wifi" class="w-3 h-3"></i>
+                                    <i data-lucide="battery-full" class="w-3 h-3"></i>
+                                </div>
+                            </div>
+                            <!-- Menu Content -->
+                            <div class="p-4 bg-gray-50 h-[500px] overflow-y-auto">
+                                <!-- Restaurant Header -->
+                                <div class="bg-gradient-to-r from-primary to-orange-400 rounded-2xl p-4 mb-4 text-white">
+                                    <h3 class="font-bold text-lg">Bella Vista</h3>
+                                    <p class="text-sm opacity-90">Italian Cuisine</p>
+                                </div>
+                                <!-- Categories -->
+                                <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+                                    <span class="bg-primary text-white px-3 py-1 rounded-full text-xs whitespace-nowrap">All</span>
+                                    <span class="bg-white text-gray-600 px-3 py-1 rounded-full text-xs whitespace-nowrap border">Starters</span>
+                                    <span class="bg-white text-gray-600 px-3 py-1 rounded-full text-xs whitespace-nowrap border">Mains</span>
+                                    <span class="bg-white text-gray-600 px-3 py-1 rounded-full text-xs whitespace-nowrap border">Desserts</span>
+                                </div>
+                                <!-- Featured Item -->
+                                <div class="bg-white rounded-xl p-3 mb-3 shadow-sm">
+                                    <div class="flex gap-3">
+                                        <div class="w-20 h-20 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                                            <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&h=200&fit=crop" alt="Pizza" class="w-full h-full object-cover">
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-start justify-between">
+                                                <h4 class="font-semibold text-sm">Truffle Pizza</h4>
+                                                <span class="bg-accent text-white text-[10px] px-2 py-0.5 rounded-full">Chef's Pick</span>
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">Wood-fired with black truffle and mozzarella</p>
+                                            <p class="text-primary font-bold mt-2">$24.00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Regular Items -->
+                                <div class="bg-white rounded-xl p-3 mb-3 shadow-sm">
+                                    <div class="flex gap-3">
+                                        <div class="w-20 h-20 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                                            <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=200&fit=crop" alt="Salad" class="w-full h-full object-cover">
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-sm">Caesar Salad</h4>
+                                            <p class="text-xs text-gray-500 mt-1">Fresh romaine with parmesan</p>
+                                            <p class="text-primary font-bold mt-2">$14.00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Floating Elements -->
+                    <div class="absolute -right-4 top-20 bg-white rounded-xl p-3 shadow-xl animate-pulse-slow">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="trending-up" class="w-4 h-4 text-accent"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Views Today</p>
+                                <p class="font-bold text-sm">+127%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute -left-4 bottom-32 bg-white rounded-xl p-3 shadow-xl animate-pulse-slow" style="animation-delay: 2s;">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="scan-line" class="w-4 h-4 text-primary"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">QR Scans</p>
+                                <p class="font-bold text-sm">482</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-primary font-semibold text-sm uppercase tracking-wider">Features</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">
+                    Everything you need to run<br>a modern restaurant
+                </h2>
+                <p class="text-gray-600 text-lg">
+                    Powerful tools designed to help you focus on what matters most - creating amazing dining experiences.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Feature 1 -->
+                <div class="feature-card bg-gray-50 rounded-2xl p-6 transition-all duration-300">
+                    <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-5">
+                        <i data-lucide="zap" class="w-7 h-7 text-primary"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Instant Updates</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Update prices, add items, or mark dishes as sold out in real-time. Changes reflect instantly across all customer devices.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card bg-gray-50 rounded-2xl p-6 transition-all duration-300">
+                    <div class="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center mb-5">
+                        <i data-lucide="qr-code" class="w-7 h-7 text-accent"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">QR Codes</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Generate beautiful QR codes for each table. Track scans, customize designs, and reprint anytime from your dashboard.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card bg-gray-50 rounded-2xl p-6 transition-all duration-300">
+                    <div class="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center mb-5">
+                        <i data-lucide="bar-chart-3" class="w-7 h-7 text-blue-500"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Analytics</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Understand customer behavior with detailed insights. See popular items, peak hours, and menu performance metrics.
+                    </p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card bg-gray-50 rounded-2xl p-6 transition-all duration-300">
+                    <div class="w-14 h-14 bg-purple-500/10 rounded-xl flex items-center justify-center mb-5">
+                        <i data-lucide="languages" class="w-7 h-7 text-purple-500"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Multi-language</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Support international customers with automatic translations. 50+ languages available with one-click switching.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Additional Features Grid -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+                <div class="flex items-start gap-4 p-4">
+                    <i data-lucide="check-circle" class="w-5 h-5 text-accent flex-shrink-0 mt-0.5"></i>
+                    <div>
+                        <h4 class="font-semibold">Dietary Tags</h4>
+                        <p class="text-sm text-gray-600">Mark vegan, gluten-free, and allergen info</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4 p-4">
+                    <i data-lucide="check-circle" class="w-5 h-5 text-accent flex-shrink-0 mt-0.5"></i>
+                    <div>
+                        <h4 class="font-semibold">Custom Branding</h4>
+                        <p class="text-sm text-gray-600">Add your logo, colors, and restaurant style</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4 p-4">
+                    <i data-lucide="check-circle" class="w-5 h-5 text-accent flex-shrink-0 mt-0.5"></i>
+                    <div>
+                        <h4 class="font-semibold">Team Management</h4>
+                        <p class="text-sm text-gray-600">Add staff with role-based permissions</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4 p-4">
+                    <i data-lucide="check-circle" class="w-5 h-5 text-accent flex-shrink-0 mt-0.5"></i>
+                    <div>
+                        <h4 class="font-semibold">Offline Mode</h4>
+                        <p class="text-sm text-gray-600">Menu works even without internet connection</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4 p-4">
+                    <i data-lucide="check-circle" class="w-5 h-5 text-accent flex-shrink-0 mt-0.5"></i>
+                    <div>
+                        <h4 class="font-semibold">Seasonal Menus</h4>
+                        <p class="text-sm text-gray-600">Schedule menu changes for holidays & events</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4 p-4">
+                    <i data-lucide="check-circle" class="w-5 h-5 text-accent flex-shrink-0 mt-0.5"></i>
+                    <div>
+                        <h4 class="font-semibold">API Access</h4>
+                        <p class="text-sm text-gray-600">Integrate with your existing POS system</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-primary font-semibold text-sm uppercase tracking-wider">How It Works</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">
+                    Get started in minutes, not days
+                </h2>
+                <p class="text-gray-600 text-lg">
+                    Our streamlined setup process gets your digital menu up and running quickly.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Step 1 -->
+                <div class="relative">
+                    <div class="bg-white rounded-2xl p-8 shadow-sm h-full">
+                        <div class="w-12 h-12 bg-primary text-white rounded-xl flex items-center justify-center font-bold text-xl mb-6">
+                            1
+                        </div>
+                        <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-5">
+                            <i data-lucide="store" class="w-8 h-8 text-primary"></i>
+                        </div>
+                        <h3 class="font-bold text-xl mb-3">Create Your Restaurant</h3>
+                        <p class="text-gray-600">
+                            Sign up and add your restaurant details. Upload your logo, choose your colors, and set your brand style.
+                        </p>
+                    </div>
+                    <!-- Connector -->
+                    <div class="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                        <i data-lucide="chevron-right" class="w-8 h-8 text-gray-300"></i>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative">
+                    <div class="bg-white rounded-2xl p-8 shadow-sm h-full">
+                        <div class="w-12 h-12 bg-primary text-white rounded-xl flex items-center justify-center font-bold text-xl mb-6">
+                            2
+                        </div>
+                        <div class="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mb-5">
+                            <i data-lucide="utensils-crossed" class="w-8 h-8 text-accent"></i>
+                        </div>
+                        <h3 class="font-bold text-xl mb-3">Build Your Menu</h3>
+                        <p class="text-gray-600">
+                            Add categories and menu items with photos, descriptions, and prices. Use our bulk import to save time.
+                        </p>
+                    </div>
+                    <!-- Connector -->
+                    <div class="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                        <i data-lucide="chevron-right" class="w-8 h-8 text-gray-300"></i>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="bg-white rounded-2xl p-8 shadow-sm h-full">
+                    <div class="w-12 h-12 bg-primary text-white rounded-xl flex items-center justify-center font-bold text-xl mb-6">
+                        3
+                    </div>
+                    <div class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-5">
+                        <i data-lucide="smartphone" class="w-8 h-8 text-blue-500"></i>
+                    </div>
+                    <h3 class="font-bold text-xl mb-3">Go Live</h3>
+                    <p class="text-gray-600">
+                        Generate QR codes for your tables, print them out, and start serving. Customers scan and view instantly.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Customer Menu Preview Section -->
+    <section id="menu-preview" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <span class="text-primary font-semibold text-sm uppercase tracking-wider">Customer Experience</span>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">
+                        Beautiful menus your<br>customers will love
+                    </h2>
+                    <p class="text-gray-600 text-lg mb-8">
+                        Mobile-optimized design ensures your menu looks stunning on any device. No downloads, no apps - just scan and browse.
+                    </p>
+
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="smartphone" class="w-5 h-5 text-primary"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">Mobile-First Design</h4>
+                                <p class="text-sm text-gray-600">Optimized for smartphones with thumb-friendly navigation</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="zap" class="w-5 h-5 text-accent"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">Lightning Fast</h4>
+                                <p class="text-sm text-gray-600">Loads instantly with optimized images and caching</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="image" class="w-5 h-5 text-blue-500"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">Rich Media Support</h4>
+                                <p class="text-sm text-gray-600">High-quality photos, dietary icons, and special badges</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Preview -->
+                <div class="flex justify-center">
+                    <div class="phone-mockup bg-gray-900 rounded-[3rem] p-3 w-80">
+                        <div class="bg-white rounded-[2.5rem] overflow-hidden">
+                            <!-- Status Bar -->
+                            <div class="bg-gray-900 text-white px-6 py-2 flex justify-between items-center text-xs">
+                                <span>9:41</span>
+                                <div class="flex items-center gap-1">
+                                    <i data-lucide="signal" class="w-3 h-3"></i>
+                                    <i data-lucide="wifi" class="w-3 h-3"></i>
+                                    <i data-lucide="battery-full" class="w-3 h-3"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Restaurant Header -->
+                            <div class="relative">
+                                <div class="h-28 bg-gradient-to-br from-primary to-orange-400 relative">
+                                    <div class="absolute inset-0 bg-black/20"></div>
+                                    <div class="absolute bottom-0 left-0 right-0 p-4">
+                                        <h3 class="font-bold text-white text-xl">Bella Vista</h3>
+                                        <p class="text-white/80 text-sm">Italian Cuisine & Wine Bar</p>
+                                    </div>
+                                </div>
+                                <div class="absolute -bottom-6 right-4 w-16 h-16 bg-white rounded-full p-1 shadow-lg">
+                                    <div class="w-full h-full bg-gray-100 rounded-full flex items-center justify-center">
+                                        <i data-lucide="utensils" class="w-8 h-8 text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Menu Content -->
+                            <div class="p-4 bg-gray-50 h-[420px] overflow-y-auto pt-8">
+                                <!-- Category Pills -->
+                                <div class="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+                                    <button class="category-pill bg-primary text-white px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap">All Items</button>
+                                    <button class="category-pill bg-white text-gray-600 px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap border border-gray-200">Starters</button>
+                                    <button class="category-pill bg-white text-gray-600 px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap border border-gray-200">Pasta</button>
+                                    <button class="category-pill bg-white text-gray-600 px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap border border-gray-200">Mains</button>
+                                    <button class="category-pill bg-white text-gray-600 px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap border border-gray-200">Desserts</button>
+                                </div>
+
+                                <!-- Featured Section -->
+                                <div class="mb-4">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <i data-lucide="flame" class="w-4 h-4 text-primary"></i>
+                                        <h4 class="font-bold text-sm">Popular Now</h4>
+                                    </div>
+                                    <div class="menu-item-card bg-white rounded-xl p-3 shadow-sm">
+                                        <div class="flex gap-3">
+                                            <div class="w-20 h-20 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                                                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&h=200&fit=crop" alt="Pizza" class="w-full h-full object-cover">
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-start justify-between gap-2">
+                                                    <h4 class="font-semibold text-sm truncate">Truffle Pizza</h4>
+                                                    <span class="bg-accent text-white text-[10px] px-2 py-0.5 rounded-full flex-shrink-0">Popular</span>
+                                                </div>
+                                                <p class="text-xs text-gray-500 mt-1 line-clamp-2">Wood-fired pizza with black truffle, mozzarella, and fresh basil</p>
+                                                <div class="flex items-center justify-between mt-2">
+                                                    <p class="text-primary font-bold">$24.00</p>
+                                                    <div class="flex items-center gap-1">
+                                                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                                        <span class="text-[10px] text-gray-500">Veg</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Regular Items -->
+                                <div class="space-y-3">
+                                    <h4 class="font-bold text-sm flex items-center gap-2">
+                                        <i data-lucide="leaf" class="w-4 h-4 text-accent"></i>
+                                        Starters
+                                    </h4>
+                                    <div class="menu-item-card bg-white rounded-xl p-3 shadow-sm">
+                                        <div class="flex gap-3">
+                                            <div class="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                                                <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=200&fit=crop" alt="Salad" class="w-full h-full object-cover">
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-start justify-between">
+                                                    <h4 class="font-semibold text-sm">Caesar Salad</h4>
+                                                    <span class="text-primary font-bold text-sm">$14.00</span>
+                                                </div>
+                                                <p class="text-xs text-gray-500 mt-1">Fresh romaine lettuce with parmesan</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="menu-item-card bg-white rounded-xl p-3 shadow-sm">
+                                        <div class="flex gap-3">
+                                            <div class="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                                                <img src="https://images.unsplash.com/photo-1572695157363-bc31c4dd0d58?w=200&h=200&fit=crop" alt="Bruschetta" class="w-full h-full object-cover">
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-start justify-between">
+                                                    <h4 class="font-semibold text-sm">Bruschetta</h4>
+                                                    <span class="text-primary font-bold text-sm">$10.00</span>
+                                                </div>
+                                                <p class="text-xs text-gray-500 mt-1">Grilled bread with tomato and basil</p>
+                                                <span class="inline-flex items-center gap-1 mt-1">
+                                                    <i data-lucide="wheat-off" class="w-3 h-3 text-amber-600"></i>
+                                                    <span class="text-[10px] text-amber-600">Gluten-free option</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Owner Dashboard Preview Section -->
+    <section id="dashboard" class="py-24 bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-primary font-semibold text-sm uppercase tracking-wider">Owner Dashboard</span>
+                <h2 class="text-3xl sm:text-4xl font-bold mt-3 mb-4">
+                    Powerful tools to manage<br>your restaurant
+                </h2>
+                <p class="text-gray-400 text-lg">
+                    Everything you need to run your digital menu, track performance, and grow your business.
+                </p>
+            </div>
+
+            <!-- Dashboard Mockup -->
+            <div class="bg-gray-850 rounded-2xl overflow-hidden shadow-2xl border border-gray-800">
+                <!-- Dashboard Header -->
+                <div class="bg-gray-800 border-b border-gray-700 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                                <i data-lucide="layout-dashboard" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold">Bella Vista</h3>
+                                <p class="text-xs text-gray-400">Dashboard</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button class="p-2 hover:bg-gray-700 rounded-lg transition-colors">
+                                <i data-lucide="bell" class="w-5 h-5 text-gray-400"></i>
+                            </button>
+                            <div class="w-8 h-8 bg-gradient-to-br from-primary to-orange-400 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-5">
+                    <!-- Sidebar -->
+                    <div class="hidden lg:block lg:col-span-1 bg-gray-800/50 border-r border-gray-700 p-4">
+                        <nav class="space-y-2">
+                            <a href="#" class="flex items-center gap-3 px-4 py-3 bg-primary/10 text-primary rounded-lg">
+                                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                                <span class="font-medium">Overview</span>
+                            </a>
+                            <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
+                                <i data-lucide="utensils" class="w-5 h-5"></i>
+                                <span>Menu</span>
+                            </a>
+                            <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
+                                <i data-lucide="qr-code" class="w-5 h-5"></i>
+                                <span>QR Codes</span>
+                            </a>
+                            <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
+                                <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                                <span>Analytics</span>
+                            </a>
+                            <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
+                                <i data-lucide="settings" class="w-5 h-5"></i>
+                                <span>Settings</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="lg:col-span-4 p-6">
+                        <!-- Stats Cards -->
+                        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                            <div class="stat-card bg-gray-800 rounded-xl p-4 border border-gray-700">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                                        <i data-lucide="eye" class="w-5 h-5 text-primary"></i>
+                                    </div>
+                                    <span class="text-accent text-xs font-medium flex items-center gap-1">
+                                        <i data-lucide="trending-up" class="w-3 h-3"></i>
+                                        +12%
+                                    </span>
+                                </div>
+                                <p class="text-gray-400 text-sm">Total Views</p>
+                                <p class="text-2xl font-bold">24,592</p>
+                            </div>
+                            <div class="stat-card bg-gray-800 rounded-xl p-4 border border-gray-700">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
+                                        <i data-lucide="scan-line" class="w-5 h-5 text-accent"></i>
+                                    </div>
+                                    <span class="text-accent text-xs font-medium flex items-center gap-1">
+                                        <i data-lucide="trending-up" class="w-3 h-3"></i>
+                                        +8%
+                                    </span>
+                                </div>
+                                <p class="text-gray-400 text-sm">QR Scans</p>
+                                <p class="text-2xl font-bold">8,429</p>
+                            </div>
+                            <div class="stat-card bg-gray-800 rounded-xl p-4 border border-gray-700">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                        <i data-lucide="mouse-pointer-click" class="w-5 h-5 text-blue-500"></i>
+                                    </div>
+                                    <span class="text-accent text-xs font-medium flex items-center gap-1">
+                                        <i data-lucide="trending-up" class="w-3 h-3"></i>
+                                        +23%
+                                    </span>
+                                </div>
+                                <p class="text-gray-400 text-sm">Item Clicks</p>
+                                <p class="text-2xl font-bold">15,203</p>
+                            </div>
+                            <div class="stat-card bg-gray-800 rounded-xl p-4 border border-gray-700">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                        <i data-lucide="users" class="w-5 h-5 text-purple-500"></i>
+                                    </div>
+                                    <span class="text-gray-400 text-xs font-medium">Today</span>
+                                </div>
+                                <p class="text-gray-400 text-sm">Unique Visitors</p>
+                                <p class="text-2xl font-bold">1,847</p>
+                            </div>
+                        </div>
+
+                        <!-- Charts & Content -->
+                        <div class="grid lg:grid-cols-3 gap-6">
+                            <!-- Analytics Chart -->
+                            <div class="lg:col-span-2 bg-gray-800 rounded-xl p-6 border border-gray-700">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h4 class="font-semibold">Menu Views</h4>
+                                    <select class="bg-gray-700 text-sm rounded-lg px-3 py-1 border border-gray-600">
+                                        <option>Last 7 days</option>
+                                        <option>Last 30 days</option>
+                                    </select>
+                                </div>
+                                <!-- Chart Bars -->
+                                <div class="flex items-end justify-between h-48 gap-2">
+                                    <div class="flex-1 flex flex-col items-center gap-2">
+                                        <div class="w-full bg-primary/80 rounded-t-lg chart-bar" style="height: 60%"></div>
+                                        <span class="text-xs text-gray-500">Mon</span>
+                                    </div>
+                                    <div class="flex-1 flex flex-col items-center gap-2">
+                                        <div class="w-full bg-primary/80 rounded-t-lg chart-bar" style="height: 80%"></div>
+                                        <span class="text-xs text-gray-500">Tue</span>
+                                    </div>
+                                    <div class="flex-1 flex flex-col items-center gap-2">
+                                        <div class="w-full bg-primary/80 rounded-t-lg chart-bar" style="height: 45%"></div>
+                                        <span class="text-xs text-gray-500">Wed</span>
+                                    </div>
+                                    <div class="flex-1 flex flex-col items-center gap-2">
+                                        <div class="w-full bg-primary/80 rounded-t-lg chart-bar" style="height: 90%"></div>
+                                        <span class="text-xs text-gray-500">Thu</span>
+                                    </div>
+                                    <div class="flex-1 flex flex-col items-center gap-2">
+                                        <div class="w-full bg-primary/80 rounded-t-lg chart-bar" style="height: 70%"></div>
+                                        <span class="text-xs text-gray-500">Fri</span>
+                                    </div>
+                                    <div class="flex-1 flex flex-col items-center gap-2">
+                                        <div class="w-full bg-primary rounded-t-lg chart-bar" style="height: 100%"></div>
+                                        <span class="text-xs text-gray-500">Sat</span>
+                                    </div>
+                                    <div class="flex-1 flex flex-col items-center gap-2">
+                                        <div class="w-full bg-primary/80 rounded-t-lg chart-bar" style="height: 85%"></div>
+                                        <span class="text-xs text-gray-500">Sun</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Popular Items -->
+                            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                                <h4 class="font-semibold mb-6">Popular Items</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center text-primary font-bold">1</div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-sm">Truffle Pizza</p>
+                                            <p class="text-xs text-gray-500">482 views</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 font-bold">2</div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-sm">Caesar Salad</p>
+                                            <p class="text-xs text-gray-500">356 views</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 font-bold">3</div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-sm">Tiramisu</p>
+                                            <p class="text-xs text-gray-500">298 views</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 font-bold">4</div>
+                                        <div class="flex-1">
+                                            <p class="font-medium text-sm">Bruschetta</p>
+                                            <p class="text-xs text-gray-500">241 views</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- QR Codes Section -->
+                        <div class="mt-6 bg-gray-800 rounded-xl p-6 border border-gray-700">
+                            <div class="flex items-center justify-between mb-6">
+                                <h4 class="font-semibold">Active QR Codes</h4>
+                                <button class="text-primary text-sm font-medium hover:underline">View All</button>
+                            </div>
+                            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                                    <div class="w-24 h-24 bg-white rounded-lg mx-auto mb-3 flex items-center justify-center">
+                                        <div class="w-20 h-20 bg-gray-900 rounded flex items-center justify-center">
+                                            <i data-lucide="qr-code" class="w-12 h-12 text-white"></i>
+                                        </div>
+                                    </div>
+                                    <p class="font-medium text-sm">Table 1</p>
+                                    <p class="text-xs text-gray-500">1,234 scans</p>
+                                </div>
+                                <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                                    <div class="w-24 h-24 bg-white rounded-lg mx-auto mb-3 flex items-center justify-center">
+                                        <div class="w-20 h-20 bg-gray-900 rounded flex items-center justify-center">
+                                            <i data-lucide="qr-code" class="w-12 h-12 text-white"></i>
+                                        </div>
+                                    </div>
+                                    <p class="font-medium text-sm">Table 2</p>
+                                    <p class="text-xs text-gray-500">987 scans</p>
+                                </div>
+                                <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                                    <div class="w-24 h-24 bg-white rounded-lg mx-auto mb-3 flex items-center justify-center">
+                                        <div class="w-20 h-20 bg-gray-900 rounded flex items-center justify-center">
+                                            <i data-lucide="qr-code" class="w-12 h-12 text-white"></i>
+                                        </div>
+                                    </div>
+                                    <p class="font-medium text-sm">Table 3</p>
+                                    <p class="text-xs text-gray-500">756 scans</p>
+                                </div>
+                                <div class="bg-gray-700/50 rounded-lg p-4 text-center border-2 border-dashed border-gray-600">
+                                    <button class="w-24 h-24 mx-auto mb-3 flex items-center justify-center text-gray-500 hover:text-primary transition-colors">
+                                        <i data-lucide="plus" class="w-8 h-8"></i>
+                                    </button>
+                                    <p class="font-medium text-sm text-gray-500">Add New</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-primary font-semibold text-sm uppercase tracking-wider">Pricing</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">
+                    Simple, transparent pricing
+                </h2>
+                <p class="text-gray-600 text-lg">
+                    Start free and scale as you grow. No hidden fees, no surprises.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <!-- Starter Plan -->
+                <div class="pricing-card bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
+                    <div class="mb-6">
+                        <h3 class="font-bold text-xl mb-2">Starter</h3>
+                        <p class="text-gray-600 text-sm">Perfect for small cafes</p>
+                    </div>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold">$0</span>
+                        <span class="text-gray-500">/month</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>Up to 50 menu items</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>3 QR codes</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>Basic analytics</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>Email support</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-gray-400">
+                            <i data-lucide="x" class="w-5 h-5 flex-shrink-0"></i>
+                            <span>Custom branding</span>
+                        </li>
+                    </ul>
+                    <button class="w-full py-3 rounded-xl border-2 border-gray-200 font-semibold text-gray-700 hover:border-primary hover:text-primary transition-colors">
+                        Get Started Free
+                    </button>
+                </div>
+
+                <!-- Professional Plan -->
+                <div class="pricing-card featured bg-white rounded-2xl p-8 shadow-xl relative">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2">
+                        <span class="bg-primary text-white text-sm font-semibold px-4 py-1 rounded-full">Most Popular</span>
+                    </div>
+                    <div class="mb-6">
+                        <h3 class="font-bold text-xl mb-2">Professional</h3>
+                        <p class="text-gray-600 text-sm">For growing restaurants</p>
+                    </div>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold">$29</span>
+                        <span class="text-gray-500">/month</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>Unlimited menu items</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>Unlimited QR codes</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>Advanced analytics</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>Custom branding</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>Multi-language support</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>Priority support</span>
+                        </li>
+                    </ul>
+                    <button class="w-full py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary-dark transition-colors shadow-lg shadow-primary/30">
+                        Start Free Trial
+                    </button>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="pricing-card bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
+                    <div class="mb-6">
+                        <h3 class="font-bold text-xl mb-2">Enterprise</h3>
+                        <p class="text-gray-600 text-sm">For restaurant chains</p>
+                    </div>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold">$99</span>
+                        <span class="text-gray-500">/month</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>Everything in Pro</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>Multiple locations</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>API access</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>Dedicated account manager</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>Custom integrations</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <i data-lucide="check" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                            <span>SLA guarantee</span>
+                        </li>
+                    </ul>
+                    <button class="w-full py-3 rounded-xl border-2 border-gray-200 font-semibold text-gray-700 hover:border-primary hover:text-primary transition-colors">
+                        Contact Sales
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-primary font-semibold text-sm uppercase tracking-wider">Testimonials</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">
+                    Loved by restaurant owners
+                </h2>
+                <p class="text-gray-600 text-lg">
+                    See what others are saying about DynamicMenu.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-gray-50 rounded-2xl p-8">
+                    <div class="flex items-center gap-1 text-yellow-400 mb-4">
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    </div>
+                    <p class="text-gray-700 mb-6 leading-relaxed">
+                        "DynamicMenu transformed how we operate. Updating prices used to take hours, now it takes seconds. Our customers love the digital experience."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <img src="https://i.pravatar.cc/100?img=11" alt="User" class="w-12 h-12 rounded-full">
+                        <div>
+                            <p class="font-semibold">Marco Rossi</p>
+                            <p class="text-sm text-gray-500">Owner, Bella Vista</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="bg-gray-50 rounded-2xl p-8">
+                    <div class="flex items-center gap-1 text-yellow-400 mb-4">
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    </div>
+                    <p class="text-gray-700 mb-6 leading-relaxed">
+                        "The analytics are a game-changer. We discovered our most popular items and optimized our menu. Sales increased by 20% in the first month."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <img src="https://i.pravatar.cc/100?img=5" alt="User" class="w-12 h-12 rounded-full">
+                        <div>
+                            <p class="font-semibold">Sarah Chen</p>
+                            <p class="text-sm text-gray-500">Manager, Noodle House</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="bg-gray-50 rounded-2xl p-8">
+                    <div class="flex items-center gap-1 text-yellow-400 mb-4">
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    </div>
+                    <p class="text-gray-700 mb-6 leading-relaxed">
+                        "We have 5 locations and managing menus was a nightmare. DynamicMenu lets us update all locations instantly. Best investment we've made."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <img src="https://i.pravatar.cc/100?img=8" alt="User" class="w-12 h-12 rounded-full">
+                        <div>
+                            <p class="font-semibold">James Wilson</p>
+                            <p class="text-sm text-gray-500">CEO, Burger Junction</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-24 bg-gray-900 relative overflow-hidden">
+        <div class="absolute inset-0">
+            <div class="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl"></div>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h2 class="text-3xl sm:text-4xl font-bold text-white mb-6">
+                Ready to modernize your menu?
+            </h2>
+            <p class="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+                Join thousands of restaurants already using DynamicMenu. Start your free trial today - no credit card required.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button class="bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:shadow-xl hover:shadow-primary/30 flex items-center justify-center gap-2">
+                    Start Free Trial
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+                <button class="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/20 px-8 py-4 rounded-xl font-semibold text-lg transition-all">
+                    Schedule Demo
+                </button>
+            </div>
+            <p class="text-gray-500 text-sm mt-6">14-day free trial • No credit card required • Cancel anytime</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-950 text-gray-400 py-12 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                            <i data-lucide="utensils" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <span class="font-bold text-xl text-white">DynamicMenu</span>
+                    </div>
+                    <p class="text-sm">
+                        Modern digital menu management for restaurants of all sizes.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Product</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-primary transition-colors">Features</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Pricing</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Integrations</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">API</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-primary transition-colors">About</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Support</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-primary transition-colors">Help Center</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Documentation</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Status</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Privacy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <p class="text-sm">© 2026 DynamicMenu. All rights reserved.</p>
+                <div class="flex items-center gap-4">
+                    <a href="#" class="hover:text-primary transition-colors">
+                        <i data-lucide="twitter" class="w-5 h-5"></i>
+                    </a>
+                    <a href="#" class="hover:text-primary transition-colors">
+                        <i data-lucide="linkedin" class="w-5 h-5"></i>
+                    </a>
+                    <a href="#" class="hover:text-primary transition-colors">
+                        <i data-lucide="github" class="w-5 h-5"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-slide-up');
+                    entry.target.style.opacity = '1';
+                }
+            });
+        }, observerOptions);
+
+        // Observe feature cards
+        document.querySelectorAll('.feature-card').forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.animationDelay = `${index * 0.1}s`;
+            observer.observe(el);
+        });
+
+        // Observe pricing cards
+        document.querySelectorAll('.pricing-card').forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.animationDelay = `${index * 0.1}s`;
+            observer.observe(el);
+        });
+
+        // Chart bars animation
+        const chartObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.querySelectorAll('.chart-bar').forEach((bar, index) => {
+                        const height = bar.style.height;
+                        bar.style.height = '0';
+                        setTimeout(() => {
+                            bar.style.height = height;
+                        }, index * 100);
+                    });
+                }
+            });
+        }, observerOptions);
+
+        const chartContainer = document.querySelector('.chart-bar')?.parentElement?.parentElement;
+        if (chartContainer) {
+            chartObserver.observe(chartContainer);
+        }
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

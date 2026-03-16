@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DynamicMenu Test</title>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <h1>Test Page</h1>
+  <p>If you can see this, the server is working.</p>
+  <a href="/">Go to App</a>
+  <hr>
+  <div id="status">Loading...</div>
+  
+  <script>
+    // Test if JavaScript works
+    document.getElementById('status').innerHTML = 
+      '<strong>JavaScript is working!</strong><br>' +
+      'Time: ' + new Date().toLocaleTimeString() + '<br>' +
+      'User Agent: ' + navigator.userAgent.substring(0, 50) + '...';
+    
+    // Try to load the main app script
+    fetch('/src/main.tsx')
+      .then(r => r.text())
+      .then(t => {
+        console.log('main.tsx loaded, length:', t.length);
+        document.getElementById('status').innerHTML += '<br>✓ main.tsx loaded (' + t.length + ' chars)';
+      })
+      .catch(e => {
+        console.error('Failed to load main.tsx:', e);
+        document.getElementById('status').innerHTML += '<br>✗ Failed to load main.tsx';
+      });
+  </script>
+</body>
+</html>
