@@ -1,6 +1,6 @@
 # DynamicMenu - AI Agent Guide
 
-This document provides essential information for AI coding agents working on the DynamicMenu project. DynamicMenu is a production-grade SaaS platform for QR-based digital menu management for restaurants.
++This document provides essential information for AI coding agents working on the DynamicMenu project. DynamicMenu is a production-grade SaaS platform for QR-based digital menu management for restaurants.
 
 ---
 
