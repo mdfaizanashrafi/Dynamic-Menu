@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DynamicMenu — Modern Menu Operating System for Restaurants</title>
+  <link rel="icon" type="image/png" href="./assets/dynamicmenu-logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -116,6 +117,13 @@
       align-items: center;
       gap: 0.5rem;
       letter-spacing: -0.02em;
+    }
+
+    .logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
     }
 
     .logo-icon {
@@ -1474,7 +1482,11 @@
   <nav class="navbar" id="navbar">
     <div class="nav-container">
       <a href="#" class="logo">
-        <div class="logo-icon">DM</div>
+        <img
+          src="./assets/dynamicmenu-logo.png"
+          alt="DynamicMenu Logo"
+          class="logo-img"
+        >
         DynamicMenu
       </a>
       <ul class="nav-links">
@@ -1804,7 +1816,11 @@
       <div class="footer-top">
         <div class="footer-brand">
           <a href="#" class="logo">
-            <div class="logo-icon">DM</div>
+            <img
+              src="./assets/dynamicmenu-logo.png"
+              alt="DynamicMenu Logo"
+              class="logo-img"
+            >
             DynamicMenu
           </a>
           <p>The modern menu operating system. Built for restaurants that care about every customer touchpoint.</p>
