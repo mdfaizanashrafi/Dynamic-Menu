@@ -1,450 +1,195 @@
-# DynamicMenu - AI Agent Guide
+# DynamicMenu — AI Agent Guide
 
-+This document provides essential information for AI coding agents working on the DynamicMenu project. DynamicMenu is a production-grade SaaS platform for QR-based digital menu management for restaurants.
+This document provides essential information for AI coding agents working on the DynamicMenu project. **The current working tree is a lightweight static landing page**, not the full-stack SaaS application that exists in the project's Git history.
 
 ---
 
 ## Project Overview
 
-DynamicMenu enables restaurants to create beautiful digital menus, generate QR codes for tables, track analytics, and manage their menu in real-time. The system consists of three main components:
+DynamicMenu is a QR-based digital menu management concept for restaurants. The **currently checked-out version** of the repository is a single-page marketing landing site that announces the product, describes its features, and collects waitlist email addresses.
 
-- **Backend API**: Node.js + Express + TypeScript + Prisma + PostgreSQL
-- **Frontend App**: React 19 + TypeScript + Vite + Tailwind CSS + shadcn/ui
-- **Component Library**: Standalone UI component collection (`app/` directory)
+It is designed to be deployed as a static site with no build step, no backend, and no external runtime dependencies beyond Google Fonts loaded via CDN.
+
+> **Important historical note:** The Git history (HEAD and earlier commits) contains a much larger full-stack codebase under `app/` and `dynamicmenu/` that included a React + Vite frontend, a Node.js + Express + Prisma backend, and a shadcn/ui component library. Those directories have been deleted from the working tree but remain in the commit history. If you need to work on that version, restore the files from Git or ask the project owner which version is authoritative.
 
 ---
 
-## Repository Structure
+## Repository Structure (Working Tree)
 
 ```
 Dynamic-Menu/
-├── app/                          # Standalone UI component library
-│   ├── src/components/ui/       # 40+ shadcn/ui components
-│   ├── src/hooks/               # Custom React hooks
-│   ├── src/lib/                 # Utility functions
-│   ├── package.json             # Dependencies
-│   ├── tailwind.config.js       # Tailwind configuration
-│   └── vite.config.ts           # Vite configuration
-│
-├── dynamicmenu/                 # Main application
-│   ├── backend/                 # Node.js API server
-│   │   ├── src/
-│   │   │   ├── modules/        # Feature modules (auth, menu, qr, etc.)
-│   │   │   ├── middleware/     # Express middleware
-│   │   │   ├── config/         # Database & env configuration
-│   │   │   ├── utils/          # Error handling, logging, utilities
-│   │   │   ├── types/          # Shared TypeScript types
-│   │   │   ├── routes/         # Route aggregation
-│   │   │   └── server.ts       # Main server entry point
-│   │   ├── prisma/
-│   │   │   └── schema.prisma   # Database schema definition
-│   │   ├── package.json        # Backend dependencies
-│   │   └── tsconfig.json       # TypeScript configuration
-│   │
-│   ├── frontend/               # React web application
-│   │   ├── src/
-│   │   │   ├── pages/          # Page components (Landing, Dashboard, etc.)
-│   │   │   ├── components/ui/  # shadcn/ui components
-│   │   │   ├── contexts/       # React contexts (AuthContext)
-│   │   │   ├── hooks/          # Custom hooks
-│   │   │   ├── lib/            # Utility functions
-│   │   │   └── App.tsx         # Main application with routing
-│   │   ├── package.json        # Frontend dependencies
-│   │   └── tailwind.config.js  # Tailwind CSS configuration
-│   │
-│   └── docs/                   # Project documentation
-│       ├── architecture.md     # System architecture
-│       ├── backend-development-guide.md
-│       └── frontend-design-system.md
+├── .git/                       # Git repository metadata
+├── .gitignore                  # Ignore rules (Node.js / React oriented, legacy)
+├── AGENTS.md                   # This file
+├── assets/
+│   └── dynamicmenu-logo.png    # Project logo (500x500 PNG)
+├── index.html                  # Single-page landing site (HTML + CSS + JS)
+└── mvp/                        # Fresh lightweight full-stack MVP
+    ├── README.md
+    ├── backend/                # Express + SQLite + JWT API
+    └── frontend/               # React + Vite + Tailwind app
 ```
+
+The `index.html` landing page remains a zero-build static site. The `mvp/` directory is a separate full-stack application with its own `package.json` files.
 
 ---
 
 ## Technology Stack
 
-### Backend
-- **Runtime**: Node.js 18+ with TypeScript
-- **Framework**: Express.js 4.x
-- **Database**: PostgreSQL 14+ with Prisma ORM 5.x
-- **Authentication**: JWT (jsonwebtoken)
-- **Validation**: Zod schemas
-- **Security**: Helmet, CORS, express-rate-limit
-- **Logging**: Winston
-- **Testing**: Vitest
-- **Build**: tsc (TypeScript compiler)
+- **HTML5** — semantic page structure
+- **CSS3** — all styles are inline within `<style>` in `index.html`
+  - CSS custom properties (variables) for the design system
+  - Flexbox and CSS Grid for layouts
+  - Media queries for responsive design
+  - CSS animations and transitions
+- **Vanilla JavaScript (ES6+)** — all behavior is inline within `<script>` in `index.html`
+  - `IntersectionObserver` for scroll-triggered animations
+  - `requestAnimationFrame` for counter animations
+  - DOM event listeners for interactions
+- **External assets**
+  - Google Fonts CDN: Plus Jakarta Sans, Inter, Manrope, JetBrains Mono
+  - Local logo image: `./assets/dynamicmenu-logo.png`
 
-### Frontend
-- **Framework**: React 19
-- **Language**: TypeScript 5.x
-- **Build Tool**: Vite 7.x
-- **Styling**: Tailwind CSS 3.4
-- **UI Components**: shadcn/ui + Radix UI primitives
-- **Icons**: Lucide React
-- **Routing**: React Router DOM 6
-- **Forms**: React Hook Form + Zod resolvers
-- **Charts**: Recharts
-- **Notifications**: Sonner
+No frameworks, no package manager, and no compilation step are required for the current site.
+
+> **MVP note:** The `mvp/` directory contains a full-stack Express + React application. See `mvp/README.md` for its setup and commands.
 
 ---
 
 ## Build and Development Commands
 
-### Backend (from `dynamicmenu/backend/`)
+Because this is a static HTML site, there is no formal build process.
+
+### Local development
+
+Open `index.html` directly in a browser:
 
 ```bash
-# Install dependencies
-npm install
+# macOS
+open index.html
 
-# Development server with hot reload
-npm run dev
-
-# Production build
-npm run build
-
-# Start production server
-npm start
-
-# Database operations
-npm run db:generate    # Generate Prisma client
-npm run db:migrate     # Run migrations in development
-npm run db:studio      # Open Prisma Studio
-
-# Code quality
-npm run lint           # ESLint
-npm run typecheck      # TypeScript check without emit
-npm test               # Run Vitest tests
+# Linux
+xdg-open index.html
 ```
 
-### Frontend (from `dynamicmenu/frontend/` or `app/`)
+Or serve it with any static file server, for example:
 
 ```bash
-# Install dependencies
-npm install
+# Python 3
+python3 -m http.server 8000
 
-# Development server
-npm run dev
+# Node.js (if npx/serve is available)
+npx serve .
 
-# Production build
-npm run build
-
-# Preview production build
-npm run preview
-
-# Linting
-npm run lint
+# PHP
+php -S localhost:8000
 ```
+
+Then visit `http://localhost:8000`.
+
+### Production deployment
+
+Deploy the repository root to any static host. The host must serve:
+
+- `index.html` at the root path
+- `assets/dynamicmenu-logo.png` at `./assets/dynamicmenu-logo.png`
+
+Suitable platforms include GitHub Pages, Vercel, Netlify, Cloudflare Pages, AWS S3 + CloudFront, or any standard web server (Nginx, Apache, Caddy).
 
 ---
 
-## Environment Configuration
+## Code Organization
 
-### Backend Environment Variables (`dynamicmenu/backend/.env`)
+All production code lives in a single file:
 
-```bash
-# Required
-DATABASE_URL="postgresql://user:password@localhost:5432/dynamicmenu?schema=public"
-JWT_SECRET="your-super-secret-jwt-key-min-32-characters"
-PORT=3001
-NODE_ENV=development
+| File | Responsibility |
+|------|----------------|
+| `index.html` | Complete landing page: `<head>` metadata, inline CSS, semantic markup, inline JavaScript |
+| `assets/dynamicmenu-logo.png` | Brand logo referenced by the navbar and footer |
 
-# CORS
-FRONTEND_URL=http://localhost:5173
+### Sections inside `index.html`
 
-# Optional
-REDIS_URL=redis://localhost:6379
-LOG_LEVEL=info
-```
-
-### Frontend Environment Variables
-
-Create `.env` file in `dynamicmenu/frontend/`:
-
-```bash
-VITE_API_URL=http://localhost:3001/api
-```
-
----
-
-## Backend Architecture
-
-### Module Structure
-
-Each backend module follows a strict 4-layer architecture:
-
-```
-module/
-├── module.types.ts      # Zod schemas & TypeScript types
-├── module.repository.ts # Data access layer (Prisma queries)
-├── module.service.ts    # Business logic layer
-├── module.controller.ts # HTTP request handlers
-└── module.routes.ts     # Route definitions
-```
-
-### Data Flow
-
-```
-Request → Route → Controller → Service → Repository → Database
-                ↓         ↓          ↓
-           Validate   Business    Query Builder
-                      Logic
-```
-
-### Existing Modules
-
-| Module | Purpose |
-|--------|---------|
-| `auth` | User registration, login, JWT authentication |
-| `restaurant` | Restaurant CRUD operations |
-| `menu` | Menu, categories, and menu items management |
-| `qr` | QR code generation and tracking |
-| `analytics` | Views, popular items, customer behavior |
-| `public` | Public API for customer-facing menu |
-
-### Path Aliases (tsconfig.json)
-
-```typescript
-import { prisma } from '@config/database';
-import { authenticate } from '@middleware/auth';
-import * as service from '@modules/menu/menu.service';
-import { logger } from '@utils/logger';
-```
+1. **`<head>`** — meta tags, title, favicon, Google Fonts preload, CSS variables, and all component styles.
+2. **Navbar** — fixed navigation with desktop links and a mobile hamburger menu.
+3. **Hero** — headline, description, CTAs, and a CSS-only dashboard mockup with animated counters.
+4. **Trusted By** — hospitality business type pills.
+5. **Features** — six feature cards (QR menus, menu management, analytics, billing, multi-location, speed).
+6. **How It Works** — five-step timeline.
+7. **Showcase** — dashboard / analytics / mobile preview cards.
+8. **Why DynamicMenu** — six value proposition items.
+9. **Pricing** — Starter, Pro, and Enterprise tiers.
+10. **Coming Soon / Waitlist** — email capture form with success message.
+11. **Footer** — product, company, and support links.
+12. **`<script>`** — navbar scroll behavior, mobile menu, fade-in observer, counter animation, ripple effect, waitlist form, smooth-scroll anchors.
 
 ---
 
 ## Code Style Guidelines
 
-### Backend
+### HTML
 
-#### Naming Conventions
-- **Files**: kebab-case.ts (e.g., `user-service.ts`)
-- **Functions**: camelCase (e.g., `getUserById`)
-- **Types/Interfaces**: PascalCase (e.g., `UserResponse`)
-- **Constants**: UPPER_SNAKE_CASE
+- Use semantic elements (`<nav>`, `<section>`, `<footer>`, `<h1>`–`<h3>`).
+- Keep accessibility attributes (`aria-label`, `alt` text) in place.
+- Anchor links use `href="#section-id"` for in-page navigation.
 
-#### Function Guidelines
-- Single responsibility: Each function does exactly one thing
-- Ideal size: 5-20 lines per function
-- Maximum nesting: 3 levels
-- Never suppress errors; use centralized error handling
+### CSS
 
-#### Error Handling Pattern
+- The project uses CSS custom properties defined on `:root` for colors, fonts, and spacing.
+- Class naming is descriptive and section-based (e.g., `.navbar`, `.hero`, `.feature-card`).
+- Mobile-first responsive patterns with breakpoints at `480px`, `640px`, `768px`, and `1024px`.
+- Honor `prefers-reduced-motion` by disabling animations for users who request reduced motion.
 
-```typescript
-import { NotFoundError, ValidationError } from '@utils/errors';
+### JavaScript
 
-// Good: Specific error types
-const getUser = async (id: string) => {
-  const user = await db.user.findUnique({ where: { id } });
-  if (!user) {
-    throw new NotFoundError('User', id);
-  }
-  return user;
-};
-```
+- Vanilla ES6+; no transpilation needed.
+- Selectors use `document.getElementById` and `document.querySelectorAll`.
+- Event listeners are attached directly after DOM elements are parsed.
+- Helper functions are small and single-purpose (`toggleMenu`, `animateCounter`, `createRipple`).
 
-### Frontend
+### Assets
 
-#### Component Structure
-
-```typescript
-// Good: Clear structure, typed props
-interface MenuItemProps {
-  item: MenuItem;
-  onToggle: (id: string) => void;
-}
-
-const MenuItemCard: React.FC<MenuItemProps> = ({ item, onToggle }) => {
-  return <div className="...">{/* Content */}</div>;
-};
-```
-
-#### Tailwind CSS Patterns
-
-```tsx
-// Container pattern
-<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-// Grid pattern
-<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-
-// Button variants
-<Button className="bg-orange-500 hover:bg-orange-600 text-white">
-<Button variant="outline" className="border-gray-300">
-<Button variant="ghost" className="text-gray-600 hover:text-gray-900">
-```
+- The logo path is `./assets/dynamicmenu-logo.png`. If you replace the logo, keep the same filename or update both references in `index.html`.
 
 ---
 
-## Database Schema
+## Testing Strategy
 
-### Core Entities
+There are no automated tests in the current working tree.
 
-- **User**: Restaurant owners, managers, staff
-- **Restaurant**: Restaurant profile with branding settings
-- **Menu**: Time-based and seasonal menus
-- **Category**: Menu categories with sort order
-- **MenuItem**: Menu items with pricing, availability, tags
-- **QRCode**: QR codes for tables/locations
-- **Offer**: Promotional offers and discounts
-- **Analytics**: View tracking and customer behavior
+Recommended manual checks after any change:
 
-See `dynamicmenu/backend/prisma/schema.prisma` for complete schema definition.
-
-### Running Migrations
-
-```bash
-cd dynamicmenu/backend
-
-# Create new migration
-npx prisma migrate dev --name add_new_feature
-
-# Deploy to production
-npx prisma migrate deploy
-
-# Generate client after schema changes
-npx prisma generate
-```
+1. Open `index.html` in Chrome, Firefox, and Safari (or their mobile equivalents).
+2. Verify the logo loads and the favicon displays.
+3. Resize the viewport to test mobile, tablet, and desktop layouts.
+4. Click the mobile hamburger menu and confirm it opens/closes.
+5. Scroll through the page and confirm fade-in animations trigger.
+6. Confirm dashboard counters animate when the hero section enters the viewport.
+7. Submit the waitlist form and confirm the success message appears.
+8. Click anchor links (Features, How It Works, Showcase, Pricing, Join Waitlist) and confirm smooth scrolling.
 
 ---
 
-## API Design
+## Deployment Process
 
-### Response Format
+1. Ensure `index.html` and `assets/dynamicmenu-logo.png` are present at the repository root.
+2. Commit changes.
+3. Push to the static hosting platform or branch configured for the site.
 
-```typescript
-// Success Response
-{
-  success: true,
-  data: T,
-  meta?: {
-    page: number,
-    limit: number,
-    total: number,
-    totalPages: number
-  }
-}
-
-// Error Response
-{
-  success: false,
-  error: {
-    code: string,
-    message: string,
-    details?: Record<string, unknown>
-  }
-}
-```
-
-### Authentication
-
-- JWT-based authentication
-- Token expires in 7 days (configurable via JWT_EXPIRES_IN)
-- Role-based access control (OWNER, MANAGER, STAFF)
-
-### Rate Limiting
-
-- General: 100 requests per 15 minutes
-- Auth endpoints: 5 requests per 15 minutes
-- Successful auth requests are skipped from rate limit
-
----
-
-## Testing Instructions
-
-### Backend Tests
-
-Uses Vitest for unit testing. Test files should be named `*.test.ts` alongside the source files.
-
-```typescript
-import { describe, it, expect, vi } from 'vitest';
-
-vi.mock('./module.repository');
-
-describe('ModuleService', () => {
-  it('should create a new item', async () => {
-    const mockData = { name: 'Test' };
-    vi.mocked(repository.create).mockResolvedValue({ id: '1', ...mockData });
-    
-    const result = await service.createItem(mockData);
-    
-    expect(result).toEqual({ id: '1', ...mockData });
-  });
-});
-```
+No build artifacts, environment files, or dependency installation steps are required.
 
 ---
 
 ## Security Considerations
 
-### Implemented Security Measures
-
-1. **Helmet**: Security headers middleware
-2. **CORS**: Configured for specific frontend origin
-3. **Rate Limiting**: Prevents abuse and brute force
-4. **Input Validation**: All inputs validated via Zod schemas
-5. **Password Hashing**: bcrypt with 12 salt rounds
-6. **SQL Injection Prevention**: Prisma ORM parameterized queries
-7. **XSS Prevention**: Input sanitization
-
-### Security Best Practices
-
-- Never log sensitive data (passwords, tokens)
-- JWT secret must be at least 32 characters in production
-- Database credentials stored in environment variables only
-- Use `select` in Prisma queries to limit exposed fields
+- The site has no server-side code, authentication, database, or API in the current working tree, so typical backend attack vectors (SQL injection, XSS from user input, JWT leaks) are not applicable here.
+- The waitlist form currently shows a client-side success message only; it does not submit data anywhere. If you connect it to a backend or third-party service, validate and sanitize the email input on the server.
+- All external resources are loaded over HTTPS (Google Fonts). Avoid mixing HTTP content.
+- Keep the `.gitignore` rules even though they target Node.js build artifacts; they prevent accidental commits if the full-stack directories are restored later.
 
 ---
 
-## Documentation References
+## Notes for AI Agents
 
-- `dynamicmenu/docs/architecture.md` - System architecture and design decisions
-- `dynamicmenu/docs/backend-development-guide.md` - Backend development patterns
-- `dynamicmenu/docs/frontend-design-system.md` - Frontend styling and components
-
----
-
-## Quick Start for Development
-
-### Prerequisites
-- Node.js 18+
-- PostgreSQL 14+
-
-### Setup Steps
-
-```bash
-# 1. Backend setup
-cd dynamicmenu/backend
-npm install
-cp .env.example .env
-# Edit .env with your database credentials
-
-npx prisma migrate dev
-npx prisma generate
-npm run dev
-
-# 2. Frontend setup (new terminal)
-cd dynamicmenu/frontend
-npm install
-npm run dev
-
-# 3. Access the application
-# Frontend: http://localhost:5173
-# API: http://localhost:3001
-# API Health: http://localhost:3001/api/health
-```
-
----
-
-## Important Notes for AI Agents
-
-1. **Two Frontend Directories**: The project has both `app/` and `dynamicmenu/frontend/`. The `app/` directory is a standalone UI component library, while `dynamicmenu/frontend/` is the actual application. Most changes should be made in `dynamicmenu/frontend/`.
-
-2. **Module Consistency**: When adding backend features, maintain the 4-layer module structure (types → repository → service → controller → routes).
-
-3. **Database Changes**: Always generate migrations and update the Prisma client after schema changes.
-
-4. **Type Safety**: Both frontend and backend use strict TypeScript. Avoid `any` types.
-
-5. **Error Handling**: Use the centralized error classes from `@utils/errors` in backend.
-
-6. **API Consistency**: Maintain the standardized response format for all API endpoints.
+- **Do not assume the full-stack `app/` or `dynamicmenu/` directories are available.** They are deleted from the working tree. Check `git status` and `git ls-tree -r HEAD` if you need to verify what is currently tracked versus what exists on disk.
+- **If you are asked to add backend/frontend functionality,** clarify whether the request refers to the static landing page or the historical full-stack codebase. The historical code is in Git and can be restored with `git checkout HEAD -- app dynamicmenu` if desired.
+- **Keep changes minimal.** Since the entire page is one file, small edits to `index.html` are usually sufficient for content or style updates.

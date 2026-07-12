@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-slate-50 text-slate-900 antialiased;
+}
+
+input, button {
+  @apply focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1;
+}
